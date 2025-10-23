@@ -1,0 +1,2 @@
+# mpic++ -o o.exe *.cpp
+# mpirun -np 4 --oversubscribe ./o.exe 
