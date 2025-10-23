@@ -41,5 +41,6 @@
 *.dwo
 
 # ide specific
-*.vscode/*
+.vscode/*
+*/.vscode/*
 .idea/*
