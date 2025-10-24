@@ -14,6 +14,6 @@ using namespace std;
  * @param nprocs le nombre de processeurs.
  * @return int* une copie de la matrice d'adjacence préparée pour le scatter.
  */
-int* prepareForScatter(int nb_nodes, int* mat_adjacence, int nprocs);
+int* prepareForScatter(int nb_nodes, int* mat_adjacence, int nprocs, int inf);
 
 #endif //FUNCP_HPP
