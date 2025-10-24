@@ -42,10 +42,10 @@ int main(int argc, char* argv[]) {
 
         mat_preparee = new int[nb_nodes*nb_nodes]();
         
-        mat_preparee = prepareForScatter(nb_nodes, mat_adjacence, nprocs);
+        mat_preparee = prepareForScatter(nb_nodes, mat_adjacence, nprocs, INF);
     
         cout << "matrice préparée" << endl;
-        affichage(mat_preparee,nb_nodes,nb_nodes,2);
+        affichage(mat_preparee,nb_nodes,nb_nodes,4);
         cout << endl;
     }
 
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
 
     if (pid == 0) {
         cout << "matrice d'envoyé à 0" << endl;
-        affichage(bloc,b,b,2);
+        affichage(bloc,b,b,4);
         cout << endl;
     }
 
