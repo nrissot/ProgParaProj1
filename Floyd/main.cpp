@@ -56,26 +56,55 @@ int main(int argc, char* argv[]) {
 
     int *bloc = new int[b*b]();
     
-    // int* Dk = MatDistance(nb_nodes, mat_adjacence);
+    // if (pid == root) {
+    //     int* Dk = MatDistance(nb_nodes, mat_adjacence);
+    
+    //     cout << "La matrice de distances" << endl;
+    //     affichage(Dk,nb_nodes,nb_nodes,3, INF);
+    // }
+    // MPI_Barrier(MPI_COMM_WORLD);
 
-    // cout << "La matrice de distances" << endl;
-    // affichage(Dk,nb_nodes,nb_nodes,3, INF);
     
     MPI_Scatter(mat_preparee, b*b, MPI_INT, bloc, b*b, MPI_INT, root, MPI_COMM_WORLD);
 
-    if (pid == 0) {
-        cout << "matrice d'envoyé à 0" << endl;
-        affichage(bloc,b,b,2, INF);
-        cout << endl;
-    }
+    // Creation des Communicateur ligne et colonne
+    int* ndims = new int[2]{nb_blocs_par_lignes, nb_blocs_par_lignes};
+    int* periods = new int[2]{0,0};
+    // Definitions des dimensions à garder pour la création des communicateurs par Cart_sub
+    int* remain_dims_col = new int[2]{0,1};
+    int* remain_dims_line = new int[2]{1,0};
 
+    MPI_Comm MPI_COMM_CART;
+    MPI_Comm MPI_COMM_COL;
+    MPI_Comm MPI_COMM_LINE;
+
+    
+    MPI_Cart_create(MPI_COMM_WORLD, 2, ndims, periods, false, &MPI_COMM_CART);
+
+
+
+    MPI_Cart_sub(MPI_COMM_CART, remain_dims_col, &MPI_COMM_COL);
+    MPI_Cart_sub(MPI_COMM_CART, remain_dims_line, &MPI_COMM_LINE);         
+
+
+    // Libération des divers array utilisés pour la séparation du 
+    // communicateur world en grille.
+    delete[] ndims;
+    delete[] periods;
+    delete[] remain_dims_line;
+    delete[] remain_dims_col;
+
+    scatteredFloydAlgorithm(bloc, b, nb_nodes, MPI_COMM_COL, MPI_COMM_LINE);
+    
     MPI_Barrier(MPI_COMM_WORLD);
+
 
     if (pid == root) {
         delete[] mat_adjacence;
         delete[] mat_preparee;
     }
     delete[] bloc;
+    
 
     MPI_Finalize();
     return 0;
