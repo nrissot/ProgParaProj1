@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
 
         mat_preparee = new int[nb_nodes*nb_nodes]();
         
-        mat_preparee = prepareForScatter(nb_nodes, mat_adjacence, nprocs, INF);
+        mat_preparee = prepareForScatter(nb_nodes, mat_adjacence);
     
         cout << "matrice préparée" << endl;
         affichage(mat_preparee,nb_nodes,nb_nodes,2,INF);
@@ -70,6 +70,7 @@ int main(int argc, char* argv[]) {
     // Creation des Communicateur ligne et colonne
     int* ndims = new int[2]{nb_blocs_par_lignes, nb_blocs_par_lignes};
     int* periods = new int[2]{0,0};
+
     // Definitions des dimensions à garder pour la création des communicateurs par Cart_sub
     int* remain_dims_col = new int[2]{0,1};
     int* remain_dims_line = new int[2]{1,0};
@@ -80,8 +81,6 @@ int main(int argc, char* argv[]) {
 
     
     MPI_Cart_create(MPI_COMM_WORLD, 2, ndims, periods, false, &MPI_COMM_CART);
-
-
 
     MPI_Cart_sub(MPI_COMM_CART, remain_dims_col, &MPI_COMM_COL);
     MPI_Cart_sub(MPI_COMM_CART, remain_dims_line, &MPI_COMM_LINE);         
@@ -95,17 +94,32 @@ int main(int argc, char* argv[]) {
     delete[] remain_dims_col;
 
     scatteredFloydAlgorithm(bloc, b, nb_nodes, MPI_COMM_COL, MPI_COMM_LINE);
-    
+
     MPI_Barrier(MPI_COMM_WORLD);
 
+    int *mat_gathered, *mat_distances;
 
+    if (pid == root) {
+       mat_gathered = new int[nb_nodes*nb_nodes];
+       mat_distances = new int[nb_nodes*nb_nodes];
+    }
+
+    MPI_Gather(bloc, b*b, MPI_INT, mat_gathered, b*b, MPI_INT, root, MPI_COMM_WORLD);
+    
+    if (pid == root) { 
+        mat_distances = repareAfterGather(nb_nodes, mat_gathered);
+        cout << "La matrice de distances" << endl;
+        affichage(mat_distances,nb_nodes,nb_nodes,3, INF);
+    }
+    
     if (pid == root) {
         delete[] mat_adjacence;
         delete[] mat_preparee;
+        delete[] mat_gathered;
+        delete[] mat_distances;
     }
     delete[] bloc;
     
-
     MPI_Finalize();
     return 0;
 }

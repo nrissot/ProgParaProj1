@@ -1,10 +1,11 @@
 #include "FuncP.hpp"
 #include <iostream>
 
-#include "Utils.hpp"
-
-int *prepareForScatter(int nb_nodes,int *mat_adjacence,int nprocs, int inf)
-{   
+int* prepareForScatter(int nb_nodes,int *mat_adjacence) {
+    int nprocs;
+    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+    
+    
     int nb_blocs_par_lignes = int(sqrt(double(nprocs)));
     int b = nb_nodes / nb_blocs_par_lignes;
 
@@ -38,12 +39,41 @@ int *prepareForScatter(int nb_nodes,int *mat_adjacence,int nprocs, int inf)
                     if(bloc_diagonal && x==y) {
                         value = 0;
                     } else {
-                        value = inf;
+                        value = INF;
                     } 
                 }
             resultat[indice] = value;
             ++indice;
             }
+        }
+    }
+    return resultat;
+}
+
+int *repareAfterGather(int nb_nodes, int *gathered_mat) {
+    int nprocs;
+    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+    
+    
+    int nb_blocs_par_lignes = int(sqrt(double(nprocs)));
+    int b = nb_nodes / nb_blocs_par_lignes;
+
+    int* resultat = new int[nb_nodes*nb_nodes];
+
+    int reading_index = 0;
+    // pour chaque bloc
+    for (int block_id = 0; block_id < nprocs; ++block_id) {
+        int x = (block_id / nb_blocs_par_lignes);
+        int y = (block_id % nb_blocs_par_lignes);
+        int writing_index = (x * nb_nodes * b) + (y * b);
+        // pour chaque indice dans le bloc
+        for (int i = 0; i < b; ++i) {
+            for (int j = 0; j < b; ++j) {
+                resultat[writing_index] = gathered_mat[reading_index];
+                reading_index++;
+                writing_index++;
+            }
+            writing_index += (nb_blocs_par_lignes -1)*b;
         }
     }
     return resultat;
@@ -55,15 +85,12 @@ void scatteredFloydAlgorithm(int* bloc, int b, int nb_nodes, MPI_Comm MPI_COMM_C
     MPI_Comm_rank(MPI_COMM_COL, &col_pid);
     MPI_Comm_rank(MPI_COMM_LINE, &line_pid);
 
-    int nb_blocs_par_dim = (int) sqrt(nb_nodes);
-
     int* recv_from_COMM_COL = new int[b];   // taille (b*1)
     int* recv_from_COMM_LINE = new int[b];  // taille (1*b)
 
     for (int l=0; l < nb_nodes; ++l) {
         int position_pid_dans_COMM = l / b;
         int position_dans_bloc = l % b;
-        MPI_Barrier(MPI_COMM_WORLD);
 
         if (col_pid == position_pid_dans_COMM) {
             // on copie les element de la ligne n° position du bloc dans recv from COL
