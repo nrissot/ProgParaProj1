@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
         mat_adjacence = lectureGraphe(file_name,&nb_nodes,&my_nodes);
        
         cout << "matrice d'adjacence" << endl;
-        affichage(mat_adjacence,nb_nodes,nb_nodes,2);
+        affichage(mat_adjacence,nb_nodes,nb_nodes,2, INF);
         cout << endl;
 
         mat_preparee = new int[nb_nodes*nb_nodes]();
@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
         mat_preparee = prepareForScatter(nb_nodes, mat_adjacence, nprocs, INF);
     
         cout << "matrice préparée" << endl;
-        affichage(mat_preparee,nb_nodes,nb_nodes,4);
+        affichage(mat_preparee,nb_nodes,nb_nodes,2,INF);
         cout << endl;
     }
 
@@ -59,13 +59,13 @@ int main(int argc, char* argv[]) {
     // int* Dk = MatDistance(nb_nodes, mat_adjacence);
 
     // cout << "La matrice de distances" << endl;
-    // affichage(Dk,nb_nodes,nb_nodes,3);
+    // affichage(Dk,nb_nodes,nb_nodes,3, INF);
     
     MPI_Scatter(mat_preparee, b*b, MPI_INT, bloc, b*b, MPI_INT, root, MPI_COMM_WORLD);
 
     if (pid == 0) {
         cout << "matrice d'envoyé à 0" << endl;
-        affichage(bloc,b,b,4);
+        affichage(bloc,b,b,2, INF);
         cout << endl;
     }
 

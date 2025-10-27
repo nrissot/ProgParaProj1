@@ -13,6 +13,6 @@ using namespace std;
  * @param m 
  * @param format pour un affichage aligné.
  */
-void affichage (int* tab, int n, int m, int format);
+void affichage (int* tab, int n, int m, int format, int inf);
 
 #endif

@@ -28,19 +28,16 @@ int *prepareForScatter(int nb_nodes,int *mat_adjacence,int nprocs, int inf)
                 // On lit l'element a ecrire dans le résultat
                 // + (x * nb_nodes) permet de se décaler d'une ligne vers le bas dans la matrice d'adjacence.
                 int value = mat_adjacence[position_debut_bloc + (x * nb_nodes) + y];
+
                 // Logique de remplacement de la valeur 0 par l'infini lorsqu'il n'y a pas de lien entre les noeuds.
                 if(value == 0){
-                    // Le bloc ne contient pas la diagonal global, pas de cas particulier traiter.
-                    if(!bloc_diagonal){
+                    // Si x == y dans un bloc contenant la diagonale globale on met à 0 
+                    // (indique qu'un noeud est à distance 0 de lui même).
+                    if(bloc_diagonal && x==y) {
+                        value = 0;
+                    } else {
                         value = inf;
-                    }else{
-                        // Si x == y alors on est sur un élément de la diagonal global et on garde 0.
-                        if(x==y){
-                            value = 0;
-                        }else{
-                            value = inf;
-                        }
-                    }   
+                    } 
                 }
             resultat[indice] = value;
             ++indice;
