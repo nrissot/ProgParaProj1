@@ -175,17 +175,17 @@ int *findLocalMedoidCandidate(int *mat_distance_fragment, int k, int nb_nodes, i
     for (int i = 0; i < k;) {
         int used = 0;
         int choice = rand() % nb_nodes;
+        for(int current_line = 0; current_line<nb_lignes_fragment;current_line++ ){
+            if(mat_distance_fragment[current_line*nb_nodes+choice] == 0){
+                used = 1;break;
+            }
+        }
         for (int j = 0; j < i; ++j) {
-            if (candidates[j] == choice || used == 1){
+            if (candidates[j] == choice){
                 used = 1;
                 break;
             }
         }
-        // for(int current_line = 0; current_line<nb_lignes_fragment;current_line++ ){
-        //     if(mat_distance_fragment[current_line*nb_nodes+candidates[i]] == 0){
-        //         used = 1;
-        //     }
-        // }
         if (used == 0) {
             candidates[i] = choice;
             ++i;

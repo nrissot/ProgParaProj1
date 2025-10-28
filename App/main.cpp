@@ -131,7 +131,9 @@ int main(int argc, char* argv[]) {
     int* mat_distances_fragment = new int[(nb_nodes / nprocs)*nb_nodes];
 
     MPI_Scatter(mat_distances, (nb_nodes / nprocs)*nb_nodes , MPI_INT, mat_distances_fragment, (nb_nodes / nprocs)*nb_nodes, MPI_INT, root, MPI_COMM_WORLD);
-    
+    if(pid == 2){
+        affichage(mat_distances_fragment,nb_nodes / nprocs,nb_nodes,2,INF);
+    }
     int* local_chosen_candidates = findLocalMedoidCandidate(mat_distances_fragment, K, nb_nodes, (nb_nodes / nprocs));
     int* reduced_candidates;
 
