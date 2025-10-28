@@ -40,4 +40,20 @@ int* repareAfterGather(int nb_nodes, int* gathered_mat);
  */
 void scatteredFloydAlgorithm(int* bloc, int b, int nb_nodes, MPI_Comm MPI_COMM_COL, MPI_Comm MPI_COMM_LINE);
 
+
+/**
+ * @brief Permet de calculer les k meilleurs candidats de médoïdes locaux (ie sur un fragment de la matrice) 
+ * pour accelerer l'éxecution de PAM. en ne choississant pas des candidats aléatoires.
+ * 
+ * @param mat_distance_fragment un fragment de la matrice des distances découpée en ligne (de taille nb_lignes_fragment × nb_nodes).
+ * @param k le nombre de médoïde candidats a retourner (k <= nb_nodes).
+ * @param nb_nodes le nombre total de noeud dans la matrice (taille des lignes de la matrice).
+ * @param nb_lignes_fragment le nombre de noeud dont on a reçu les distances (nombre de lignes du fragment).
+ *
+ * @return un tableau d'entier avec pour valeur 0 ou 1. 
+ * L'index i vaut 1 (resp. 0) si le i-ème noeud a été choisis (resp. n'a pas été choisit) comme médoïde.
+ * Le tableau retourné aura exactement k valeurs 1 et nb_nodes - k valeurs 0
+ */
+int* findLocalMedoidCandidate(int* mat_distance_fragment, int k, int nb_nodes, int nb_lignes_fragment);
+
 #endif //FUNCP_HPP
