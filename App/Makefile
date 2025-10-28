@@ -5,14 +5,14 @@ CXXFLAGS = -std=c++11 -Wall -Wextra -pedantic -lcgraph -lgvc -lxdot
 # Build any program from .cpp and run it immediately
 .SUFFIXES:
 
-all: main run
+all: main run cleano
 
 # Pattern rule: build executable from .o
 main: main.o ForGraph.o FuncP.o Utils.o
 	$(CXX) -o $@ $^ $(CXXFLAGS)
 
 run:
-	mpirun -np 4 --oversubscribe ./main "exemples/PetitExemple.dot"
+	mpirun -np 4 --oversubscribe ./main "exemples/Exemple2.dot" 2
 
 # Pattern rule: build object file from .cpp
 %.o: %.cpp
