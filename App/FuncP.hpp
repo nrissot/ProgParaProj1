@@ -67,4 +67,22 @@ int* findLocalMedoidCandidate(int* mat_distance_fragment, int k, int nb_nodes, i
 * @return tableau des candidats globaux choisis.
  */
 int* process_candidates(std::vector<std::vector<int>>* dadastruct,int* data_to_process,int nb_noeud,int nb_medoides);
+
+/**
+* @brief  Calcul le cout du swap d'un ménoide par un autre noeud du graphe.
+* @param  current_candidates La liste des menoide a l'état courrant.
+* @param  cout_locaux le tableeau contenant les couts de chaque swap possible.
+* @param  data_fragment un fragment de la matrice des distances découpée en ligne (de taille nb_lignes_fragment × nb_nodes).
+* @param  k le nombre de medoides voulu.
+*/
+void calcul_cout_swap(int* current_candidates, int* cout_locaux,int* data_fragment, int k);  // TODO: Just do it.
+
+/**
+* @brief  Calcule les meilleurs candidat sur une itération
+* @param  cout_global_reduced La somme de tous les couts de swap locaux.
+* @param  k le nombre de medoides voulu.
+* @param  current_candidates La liste des menoide a l'état courrant.
+* @return 0 si les menoid ne changent pas. 1 si il y a un changement.
+*/
+int choix_nouveaux_candidats(int* cout_global_reduced, int k, int* current_candidates); // TODO: Just do it.
 #endif //FUNCP_HPP
