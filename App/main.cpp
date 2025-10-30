@@ -125,14 +125,14 @@ int main(int argc, char* argv[]) {
     if (pid == root) { 
         mat_distances = repareAfterGather(nb_nodes, mat_gathered);
         cout << "La matrice de distances" << endl;
-        affichage(mat_distances,nb_nodes,nb_nodes,3, INF);
+        //affichage(mat_distances,nb_nodes,nb_nodes,3, INF);
     }
 
     int* mat_distances_fragment = new int[(nb_nodes / nprocs)*nb_nodes];
 
     MPI_Scatter(mat_distances, (nb_nodes / nprocs)*nb_nodes , MPI_INT, mat_distances_fragment, (nb_nodes / nprocs)*nb_nodes, MPI_INT, root, MPI_COMM_WORLD);
     if(pid == 2){
-        affichage(mat_distances_fragment,nb_nodes / nprocs,nb_nodes,2,INF);
+        //affichage(mat_distances_fragment,nb_nodes / nprocs,nb_nodes,2,INF);
     }
     int* local_chosen_candidates = findLocalMedoidCandidate(mat_distances_fragment, K, nb_nodes, (nb_nodes / nprocs));
     int* reduced_candidates;
@@ -142,13 +142,22 @@ int main(int argc, char* argv[]) {
     }
 
     MPI_Reduce(local_chosen_candidates,reduced_candidates,nb_nodes,MPI_INT,MPI_SUM,root,MPI_COMM_WORLD);
+    // On a plus besoin du tableau des candidats locaux
+    delete[] local_chosen_candidates;
 
+    std::vector<std::vector<int>>* candidates_per_value;
     if (pid == root) {
+        candidates_per_value = new std::vector<std::vector<int>>;
+        // nprocs+1 car certains processus peuvent "voter" pour un noeud n'étant pas dans leur fragment, et donc les valeurs peuvent aller de 0 à nprocs inclus.
+        (*candidates_per_value).resize(nprocs+1);
         affichage(reduced_candidates, 1, nb_nodes, 2, INF);
+        int* candidates_globaux = process_candidates(candidates_per_value,reduced_candidates,nb_nodes,K);
+        affichage(candidates_globaux, 1, K, 2, INF);
+        delete candidates_per_value;
     }
 
+
     delete[] mat_distances_fragment;
-    delete[] local_chosen_candidates;
 
     if (pid == root) {
         delete[] mat_adjacence;

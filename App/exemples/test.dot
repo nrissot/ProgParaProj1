@@ -146,4 +146,14 @@ N72 -- N85 [label="8", weight=8];
 N77 -- N90 [label="4", weight=4];
 N82 -- N95 [label="7", weight=7];
 N87 -- N100 [label="3", weight=3];
+N44 -- N98 [label="3", weight=3];
+N49 -- N13 [label="4", weight=4];
+N53 -- N60 [label="7", weight=7];
+N57 -- N22 [label="9", weight=9];
+N62 -- N99 [label="6", weight=6];
+N68 -- N37 [label="5", weight=5];
+N72 -- N2 [label="8", weight=8];
+N77 -- N1 [label="4", weight=4];
+N82 -- N53 [label="7", weight=7];
+N87 -- N5 [label="3", weight=3];
 }

@@ -12,7 +12,7 @@ main: main.o ForGraph.o FuncP.o Utils.o
 	$(CXX) -o $@ $^ $(CXXFLAGS)
 
 run:
-	mpirun -np 4 --oversubscribe ./main "exemples/test.dot" 4
+	mpirun -np 16 --oversubscribe ./main "exemples/test.dot" 6
 
 # Pattern rule: build object file from .cpp
 %.o: %.cpp

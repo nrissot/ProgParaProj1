@@ -236,3 +236,24 @@ int *findLocalMedoidCandidate(int *mat_distance_fragment, int k, int nb_nodes, i
     delete[] candidates;
     return candidates_flags;
 }
+
+int* process_candidates(std::vector<std::vector<int>>* dadastruct,int* data_to_process,int nb_noeud,int nb_medoides){
+    int medoides_added = 0; 
+    int* data_processed = new int[nb_medoides];
+    for(int i = 0;i<nb_noeud;++i){
+        (*dadastruct)[data_to_process[i]].push_back(i);
+    }for (int i = (*dadastruct).size() - 1; i >= 0; --i) {
+        for(int j = 0 ; j < (*dadastruct)[i].size();j++){
+            data_processed[medoides_added] = (*dadastruct)[i][j];
+            medoides_added++;
+            if(medoides_added==nb_medoides){
+                break;
+            }
+        }
+        if(medoides_added==nb_medoides){
+            break;
+        }
+    }
+
+    return data_processed;
+}

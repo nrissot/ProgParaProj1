@@ -58,4 +58,13 @@ void scatteredFloydAlgorithm(int* bloc, int b, int nb_nodes, MPI_Comm MPI_COMM_C
  */
 int* findLocalMedoidCandidate(int* mat_distance_fragment, int k, int nb_nodes, int nb_lignes_fragment);
 
+/**
+* @brief  Traiter le tableau reduced des candidats locaux.
+* @param  dadastruct un vecteur temporaire pour le traitement.
+* @param  data_to_process le tableau réduit des candidats locaux.
+* @param  nb_medoides le nombre de medoides voulu.
+* @param  nb_noeud le nombre de noeud de notre matrice de distance.
+* @return tableau des candidats globaux choisis.
+ */
+int* process_candidates(std::vector<std::vector<int>>* dadastruct,int* data_to_process,int nb_noeud,int nb_medoides);
 #endif //FUNCP_HPP
