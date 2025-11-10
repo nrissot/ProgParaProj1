@@ -79,10 +79,12 @@ void calcul_cout_swap(int* current_candidates, int* cout_locaux,int* data_fragme
 
 /**
 * @brief  Calcule les meilleurs candidat sur une itération
-* @param  cout_global_reduced La somme de tous les couts de swap locaux.
+* @param  nb_nodes La taille de la matrice de distance
+* @param  cout_global_reduced La somme de tous les couts de swap locaux (array, de taille nb_nodes de couts associé à chaque noeud : cout_global_reduced[identi]).
 * @param  k le nombre de medoides voulu.
-* @param  current_candidates La liste des menoide a l'état courrant.
-* @return 0 si les menoid ne changent pas. 1 si il y a un changement.
+* @param  current_candidates La liste des médoïdes a l'état courant (array de taille k, des identifiants des noeuds médoïdes.).
+* @return 0 si les medoid ne changent pas. 1 si il y a un changement.
 */
-int choix_nouveaux_candidats(int* cout_global_reduced, int k, int* current_candidates); // TODO: Just do it.
+int choix_nouveaux_candidats(int nb_nodes,int* cout_global_reduced, int k, int* current_candidates); // TODO: Just do it.
+
 #endif //FUNCP_HPP

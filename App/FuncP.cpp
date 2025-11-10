@@ -200,6 +200,7 @@ int *findLocalMedoidCandidate(int *mat_distance_fragment, int k, int nb_nodes, i
         int current_cost = cost_from_candidate_set(mat_distance_fragment,candidates,k,nb_nodes,nb_lignes_fragment);
         
         int* copy = new int[k];
+        // int* index_locaux = ~ index noeud locaux
 
         // for each medoid
         for (int i = 0; i < k; ++i) {
@@ -207,7 +208,9 @@ int *findLocalMedoidCandidate(int *mat_distance_fragment, int k, int nb_nodes, i
             // we try every node that is not already a medoid to see if we can lower the cost
             for (int j = 0; j < nb_nodes; ++j) {
                 memcpy(copy,candidates,sizeof(int)*k);
-                if(!is_in(copy,j,k)) {
+                // rajouter "au bout" index_locaux
+
+                if(!is_in(copy,j,k)) { // && !is_in index_locaux
                     copy[i] = j;
                     int new_cost = cost_from_candidate_set(mat_distance_fragment,copy,k,nb_nodes,nb_lignes_fragment);
                     // if the candidate is not a member of the fragment
@@ -237,14 +240,16 @@ int *findLocalMedoidCandidate(int *mat_distance_fragment, int k, int nb_nodes, i
     return candidates_flags;
 }
 
-int* process_candidates(std::vector<std::vector<int>>* dadastruct,int* data_to_process,int nb_noeud,int nb_medoides){
+int* process_candidates(std::vector<std::vector<int>>* datastruct,int* data_to_process,int nb_noeud,int nb_medoides){
     int medoides_added = 0; 
     int* data_processed = new int[nb_medoides];
+    // on parcours data to process et on remplit datastruct.
     for(int i = 0;i<nb_noeud;++i){
-        (*dadastruct)[data_to_process[i]].push_back(i);
-    }for (int i = (*dadastruct).size() - 1; i >= 0; --i) {
-        for(int j = 0 ; j < (*dadastruct)[i].size();j++){
-            data_processed[medoides_added] = (*dadastruct)[i][j];
+        (*datastruct)[data_to_process[i]].push_back(i);
+    }
+    for (int i = (*datastruct).size() - 1; i >= 0; --i) {
+        for(int j = 0 ; j < (*datastruct)[i].size();j++){
+            data_processed[medoides_added] = (*datastruct)[i][j];
             medoides_added++;
             if(medoides_added==nb_medoides){
                 break;

@@ -31,8 +31,6 @@ int main(int argc, char* argv[]) {
     
     int nb_nodes;
     
-
-    MPI_Barrier(MPI_COMM_WORLD);
     
     if (pid == root) {
         char* file_name = argv[1];
@@ -111,8 +109,6 @@ int main(int argc, char* argv[]) {
 
     scatteredFloydAlgorithm(bloc, b, nb_nodes, MPI_COMM_COL, MPI_COMM_LINE);
 
-    MPI_Barrier(MPI_COMM_WORLD);
-
     int *mat_gathered, *mat_distances;
 
     if (pid == root) {
@@ -153,17 +149,17 @@ int main(int argc, char* argv[]) {
         candidates_globaux = new int[nb_nodes];
     }
     if (pid == root) {
-        cout_globaux_reduced = new int[nb_nodes*K];
+        cout_globaux_reduced = new int[nb_nodes*K]; // *K ?
         candidates_per_value = new std::vector<std::vector<int>>;
         // nprocs+1 car certains processus peuvent "voter" pour un noeud n'étant pas dans leur fragment, et donc les valeurs peuvent aller de 0 à nprocs inclus.
-        (*candidates_per_value).resize(nprocs+1);
+        (*candidates_per_value).resize(nprocs+1); // retirer le -1 une fois l'init fix
         affichage(reduced_candidates, 1, nb_nodes, 2, INF);
         candidates_globaux = process_candidates(candidates_per_value,reduced_candidates,nb_nodes,K);
         affichage(candidates_globaux, 1, K, 2, INF);
         delete candidates_per_value;
     }
 
-    // On écrira dans ce tableau le cout local pour un changement de ménoide pour un autre noeud. Et ce, pour l'ensemble des ménoides (donc K tableau de cout).
+    // On écrira dans ce tableau le cout local pour un changement de médoide pour un autre noeud. Et ce, pour l'ensemble des médoides (donc K tableau de cout).
     int* cout_locaux = new int[nb_nodes*K];
     int changement = 1;
     while(changement){
@@ -171,12 +167,16 @@ int main(int argc, char* argv[]) {
         MPI_Bcast(candidates_globaux,nb_nodes,MPI_INT,root,MPI_COMM_WORLD);
         calcul_cout_swap(candidates_globaux, cout_locaux,mat_distances_fragment, K);
         MPI_Reduce(cout_locaux,cout_globaux_reduced,nb_nodes*K,MPI_INT,MPI_SUM,root,MPI_COMM_WORLD);
-        changement = choix_nouveaux_candidats(cout_globaux_reduced, K,candidates_globaux);
+        if(pid == root){
+            changement = choix_nouveaux_candidats(nb_nodes,cout_globaux_reduced, K,candidates_globaux);
+        }
+        MPI_Bcast(&changement,1,MPI_INT,root,MPI_COMM_WORLD);
     }
 
 
     delete[] mat_distances_fragment;
     delete[] cout_locaux;
+    
     if (pid == root) {
         delete[] cout_globaux_reduced;
         delete[] candidates_globaux;
