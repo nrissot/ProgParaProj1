@@ -70,15 +70,6 @@ int main(int argc, char* argv[]) {
 
     int *bloc = new int[b*b]();
     
-    // if (pid == root) {
-    //     int* Dk = MatDistance(nb_nodes, mat_adjacence);
-    
-    //     cout << "La matrice de distances" << endl;
-    //     affichage(Dk,nb_nodes,nb_nodes,3, INF);
-    // }
-    // MPI_Barrier(MPI_COMM_WORLD);
-
-    
     MPI_Scatter(mat_preparee, b*b, MPI_INT, bloc, b*b, MPI_INT, root, MPI_COMM_WORLD);
 
     // Creation des Communicateur ligne et colonne
@@ -120,17 +111,38 @@ int main(int argc, char* argv[]) {
     
     if (pid == root) { 
         mat_distances = repareAfterGather(nb_nodes, mat_gathered);
-        cout << "La matrice de distances" << endl;
-        //affichage(mat_distances,nb_nodes,nb_nodes,3, INF);
     }
 
-    int* mat_distances_fragment = new int[(nb_nodes / nprocs)*nb_nodes];
+    // if we need to shuffle, do it here.
 
-    MPI_Scatter(mat_distances, (nb_nodes / nprocs)*nb_nodes , MPI_INT, mat_distances_fragment, (nb_nodes / nprocs)*nb_nodes, MPI_INT, root, MPI_COMM_WORLD);
-    if(pid == 2){
-        //affichage(mat_distances_fragment,nb_nodes / nprocs,nb_nodes,2,INF);
+    int *displs, *sendcount;
+
+    int recvcount = (nb_nodes%nprocs >= pid) ? (((nb_nodes/nprocs)+1)*nb_nodes) : ((nb_nodes/nprocs)*nb_nodes); 
+    int* mat_distances_fragment = new int[recvcount];
+
+    if (pid == root) {
+        displs = new int[nprocs];
+        sendcount = new int[nprocs];
+        int displacement_index = 0;
+        int nprocs_overload = nb_nodes % nprocs;
+
+        for (int i = 0; i < nprocs; ++i) {
+            int current_send_count_value = (nprocs_overload > i) ? (((nb_nodes/nprocs)+1)*nb_nodes) : ((nb_nodes/nprocs)*nb_nodes);
+            sendcount[i] = current_send_count_value;
+            displs[i] = displacement_index;
+            displacement_index += current_send_count_value;
+        }
     }
+
+    MPI_Scatterv(mat_distances, sendcount, displs, MPI_INT, mat_distances_fragment, recvcount, MPI_INT, root, MPI_COMM_WORLD);
+
+    if (pid == root) {
+        delete[] displs;
+        delete[] sendcount;
+    }
+
     int* local_chosen_candidates = findLocalMedoidCandidate(mat_distances_fragment, K, nb_nodes, (nb_nodes / nprocs));
+
     int* reduced_candidates;
 
     if (pid == root) {
@@ -160,12 +172,13 @@ int main(int argc, char* argv[]) {
     }
 
     // On écrira dans ce tableau le cout local pour un changement de médoide pour un autre noeud. Et ce, pour l'ensemble des médoides (donc K tableau de cout).
+
     int* cout_locaux = new int[nb_nodes*K];
     int changement = 1;
     while(changement){
         changement = 0;
         MPI_Bcast(candidates_globaux,nb_nodes,MPI_INT,root,MPI_COMM_WORLD);
-        calcul_cout_swap(candidates_globaux, cout_locaux,mat_distances_fragment, K);
+        calcul_cout_swap(candidates_globaux, cout_locaux,mat_distances_fragment, K, nb_nodes, recvcount/nb_nodes);
         MPI_Reduce(cout_locaux,cout_globaux_reduced,nb_nodes*K,MPI_INT,MPI_SUM,root,MPI_COMM_WORLD);
         if(pid == root){
             changement = choix_nouveaux_candidats(nb_nodes,cout_globaux_reduced, K,candidates_globaux);
@@ -173,9 +186,14 @@ int main(int argc, char* argv[]) {
         MPI_Bcast(&changement,1,MPI_INT,root,MPI_COMM_WORLD);
     }
 
+    if (pid == root) {
+        affichage(candidates_globaux, 1, nb_nodes, 2, INF);
+    }    
 
-    delete[] mat_distances_fragment;
+
+
     delete[] cout_locaux;
+    delete[] mat_distances_fragment;
     
     if (pid == root) {
         delete[] cout_globaux_reduced;

@@ -1,5 +1,6 @@
 #include "FuncP.hpp"
-#include <iostream> // TODO:DELETEME
+#include <iostream>  // TODO:DELETEME
+#include "Utils.hpp" // TODO:DELETEME
 
 // ____ PRIVATE HELPERS ________________________________________________________________________________________________
 
@@ -7,14 +8,14 @@
  * @brief fonction helper privée pour verifier la présence d'un element dans un tableau.
  * 
  * @param tab le tableau (de taille len).
- * @param val l'élément recherché.
+ * @param elt l'élément recherché.
  * @param len la taille de tab.
  * 
  * @return 1 si l'élément est présent, 0 sinon.
  */
-int is_in(int* tab, int val, int len) {
+int is_in(int* tab, int elt, int len) {
     for (int i = 0; i < len; ++i) {
-        if (tab[i] == val) {
+        if (tab[i] == elt) {
             return 1;
         }
     }
@@ -35,12 +36,13 @@ int is_in(int* tab, int val, int len) {
  */
 int cost_from_candidate_set(int *mat_distance_fragment, int* candidates, int k, int nb_nodes, int nb_lignes_fragment) {
     int sum = 0;
-    for(int current_node = 0; current_node < nb_lignes_fragment; current_node++){
-        int min_current = INF;          
-        for (int i = 0 ; i < k; i++){
-            if (mat_distance_fragment[current_node*nb_nodes + candidates[i]] == 0) {
-                return -1;
-            }
+    int min_current = INF;          
+    for(int current_node = 0; current_node < nb_lignes_fragment; current_node++) {
+        for (int i = 0 ; i < k; i++) {
+            // NOTE: old way to spot error, shoudlnt happen TODO:DELETEME ?
+            // if (mat_distance_fragment[current_node*nb_nodes + candidates[i]] == 0) {
+            //     return -1;
+            // }
             min_current = min(mat_distance_fragment[current_node*nb_nodes + candidates[i]], min_current);
         }
         sum += min_current;
@@ -200,8 +202,31 @@ int *findLocalMedoidCandidate(int *mat_distance_fragment, int k, int nb_nodes, i
         int current_cost = cost_from_candidate_set(mat_distance_fragment,candidates,k,nb_nodes,nb_lignes_fragment);
         
         int* copy = new int[k];
-        // int* index_locaux = ~ index noeud locaux
+        // Array of local index node in our matrix fragment.
+        int* index_locaux = new int[nb_lignes_fragment];
 
+        
+        for (int i = 0; i < nb_lignes_fragment; ++i) {
+            for (int j = 0; j < nb_nodes; ++j) {
+                if(mat_distance_fragment[i*nb_nodes + j] == 0) {
+                    // if the value is the distance from a node to itself, (ie, value=0)
+                    // we add it as a local node.
+                    index_locaux[i] = j;
+                    break;
+                }
+            }
+        }
+        int pid; 
+        MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+
+        if(pid == 15){
+            cout << "affichage du fragment de matrice de 15: " << endl;
+            affichage(mat_distance_fragment, nb_lignes_fragment, nb_nodes,2,1000);
+            cout << "hmmmm trés intéressant hmm hmm " << endl; // TODO:DELETEME
+
+        }
+        
+        
         // for each medoid
         for (int i = 0; i < k; ++i) {
             
@@ -210,18 +235,16 @@ int *findLocalMedoidCandidate(int *mat_distance_fragment, int k, int nb_nodes, i
                 memcpy(copy,candidates,sizeof(int)*k);
                 // rajouter "au bout" index_locaux
 
-                if(!is_in(copy,j,k)) { // && !is_in index_locaux
+                if(!is_in(copy,j,k) && !is_in(index_locaux,j,nb_lignes_fragment)) { // && !is_in index_locaux
                     copy[i] = j;
                     int new_cost = cost_from_candidate_set(mat_distance_fragment,copy,k,nb_nodes,nb_lignes_fragment);
                     // if the candidate is not a member of the fragment
-                    if (new_cost != -1) {
-                        if(current_cost > new_cost){
-                            // we can lower the cost, we update the candidates array.
-                            candidates[i]=copy[i];
-    
-                            // we change something, we update the flag.
-                            flag=1;                        
-                        }
+                    if(current_cost > new_cost){
+                        // we can lower the cost, we update the candidates array.
+                        candidates[i]=copy[i];
+
+                        // we change something, we update the flag.
+                        flag=1;                        
                     }
                 }
             }
@@ -231,7 +254,7 @@ int *findLocalMedoidCandidate(int *mat_distance_fragment, int k, int nb_nodes, i
     } while (flag != 0);
     
     int* candidates_flags = new int[nb_nodes]{};
-    //                        ↑ initialise the values of the array to 0
+    //                                       ↑ initialise the values of the array to 0
 
     for (int i = 0; i < k; ++i) {
         candidates_flags[candidates[i]] = 1;
@@ -261,4 +284,34 @@ int* process_candidates(std::vector<std::vector<int>>* datastruct,int* data_to_p
     }
 
     return data_processed;
+}
+
+void calcul_cout_swap(int *current_candidates, int *cout_locaux, int *mat_distance_fragment, int k, int nb_nodes, int nb_lignes_fragment) {
+    int *new_candidates = new int[k];
+
+    for (int i = 0; i < k; ++i) {
+        for (int j = 0; j < nb_nodes; ++j) {
+            // if the current index is not already a candidates
+            if (!is_in(current_candidates, j, k)) {
+                memcpy(new_candidates, current_candidates,k);
+                new_candidates[i] = j;
+                cout_locaux[(i*nb_nodes)+j] = cost_from_candidate_set(mat_distance_fragment, current_candidates, k, nb_nodes, nb_lignes_fragment);
+            }
+        }
+    }
+}
+
+int choix_nouveaux_candidats(int nb_nodes, int *cout_global_reduced, int k, int *current_candidates) {
+    int flag = 0;
+    for (int i = 0; i < k; ++i) {
+        int optimal_cost = INF;
+        for (int j = 0; j < nb_nodes; ++j) {
+            if (!is_in(current_candidates,j,k) && cout_global_reduced[(i*nb_nodes)+j] < optimal_cost) {
+                optimal_cost = cout_global_reduced[(i*nb_nodes)+j];
+                current_candidates[i] = j;
+                flag = 1;
+            }
+        }
+    }
+    return flag;
 }

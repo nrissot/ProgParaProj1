@@ -69,22 +69,24 @@ int* findLocalMedoidCandidate(int* mat_distance_fragment, int k, int nb_nodes, i
 int* process_candidates(std::vector<std::vector<int>>* dadastruct,int* data_to_process,int nb_noeud,int nb_medoides);
 
 /**
-* @brief  Calcul le cout du swap d'un ménoide par un autre noeud du graphe.
-* @param  current_candidates La liste des menoide a l'état courrant.
-* @param  cout_locaux le tableeau contenant les couts de chaque swap possible.
-* @param  data_fragment un fragment de la matrice des distances découpée en ligne (de taille nb_lignes_fragment × nb_nodes).
-* @param  k le nombre de medoides voulu.
-*/
-void calcul_cout_swap(int* current_candidates, int* cout_locaux,int* data_fragment, int k);  // TODO: Just do it.
+ * @brief  Calcul le cout du swap d'un médoide par un autre noeud du graphe.
+ * @param  current_candidates La liste des index des médoides a l'état courant (de taille k).
+ * @param  cout_locaux le tableau contenant les couts de chaque swap possible.
+ * @param  mat_distance_fragment un fragment de la matrice des distances découpée en ligne (de taille nb_lignes_fragment × nb_nodes).
+ * @param  k le nombre de médoides voulu.
+ * @param  nb_nodes le nombre total de noeud dans la matrice (taille des lignes de la matrice).
+ * @param  nb_lignes_fragment le nombre de noeud dont on a reçu les distances (nombre de lignes du fragment).
+ */
+void calcul_cout_swap(int* current_candidates, int* cout_locaux,int* mat_distance_fragment, int k, int nb_nodes, int nb_lignes);
 
 /**
 * @brief  Calcule les meilleurs candidat sur une itération
 * @param  nb_nodes La taille de la matrice de distance
 * @param  cout_global_reduced La somme de tous les couts de swap locaux (array, de taille nb_nodes de couts associé à chaque noeud : cout_global_reduced[identi]).
-* @param  k le nombre de medoides voulu.
+* @param  k le nombre de médoïdes voulu.
 * @param  current_candidates La liste des médoïdes a l'état courant (array de taille k, des identifiants des noeuds médoïdes.).
-* @return 0 si les medoid ne changent pas. 1 si il y a un changement.
+* @return 0 si les médoïdes ne changent pas. 1 si il y a un changement.
 */
-int choix_nouveaux_candidats(int nb_nodes,int* cout_global_reduced, int k, int* current_candidates); // TODO: Just do it.
+int choix_nouveaux_candidats(int nb_nodes,int* cout_global_reduced, int k, int* current_candidates);
 
 #endif //FUNCP_HPP
