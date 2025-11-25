@@ -36,8 +36,8 @@ int is_in(int* tab, int elt, int len) {
  */
 int cost_from_candidate_set(int *mat_distance_fragment, int* candidates, int k, int nb_nodes, int nb_lignes_fragment) {
     int sum = 0;
-    int min_current = INF;          
     for(int current_node = 0; current_node < nb_lignes_fragment; current_node++) {
+        int min_current = INF;          
         for (int i = 0 ; i < k; i++) {
             // NOTE: old way to spot error, shoudlnt happen TODO:DELETEME ?
             // if (mat_distance_fragment[current_node*nb_nodes + candidates[i]] == 0) {
@@ -219,12 +219,12 @@ int *findLocalMedoidCandidate(int *mat_distance_fragment, int k, int nb_nodes, i
         int pid; 
         MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
-        if(pid == 15){
-            cout << "affichage du fragment de matrice de 15: " << endl;
-            affichage(mat_distance_fragment, nb_lignes_fragment, nb_nodes,2,1000);
-            cout << "hmmmm trés intéressant hmm hmm " << endl; // TODO:DELETEME
+        // if(pid == 15){
+        //     cout << "affichage du fragment de matrice de 15: " << endl;
+        //     affichage(mat_distance_fragment, nb_lignes_fragment, nb_nodes,2,1000);
+        //     cout << "hmmmm trés intéressant hmm hmm " << endl; // TODO:DELETEME
 
-        }
+        // }
         
         
         // for each medoid
@@ -293,9 +293,9 @@ void calcul_cout_swap(int *current_candidates, int *cout_locaux, int *mat_distan
         for (int j = 0; j < nb_nodes; ++j) {
             // if the current index is not already a candidates
             if (!is_in(current_candidates, j, k)) {
-                memcpy(new_candidates, current_candidates,k);
+                memcpy(new_candidates, current_candidates,k*sizeof(int));
                 new_candidates[i] = j;
-                cout_locaux[(i*nb_nodes)+j] = cost_from_candidate_set(mat_distance_fragment, current_candidates, k, nb_nodes, nb_lignes_fragment);
+                cout_locaux[(i*nb_nodes)+j] = cost_from_candidate_set(mat_distance_fragment, new_candidates, k, nb_nodes, nb_lignes_fragment);
             }
         }
     }

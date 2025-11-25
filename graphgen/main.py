@@ -1,9 +1,10 @@
-from random import randint
+from random import randint, shuffle
 
-EXPORT_PATH         : str = "graphgen/exported_graph.dot"
-
-NUMBER_OF_COMMUNITY : int = 4
-NUMBER_OF_NODES     : int = 100
+EXPORT_PATH             : str = "exported_graph.dot"
+NUMBER_OF_COMMUNITY     : int = 4
+NUMBER_OF_NODES         : int = 100
+INTER_COMMUNITY_WEIGHT  : int = 10
+INTRA_COMMUNITY_WEIGHT  : tuple[int, int] = (1, 3)
 
 type node  = str
 type edge  = tuple[node, node, int]
@@ -31,15 +32,18 @@ def main() :
         
         community_edges : list[edge] = []
         for e in new_edges_wo_weight :
-            community_edges.append((e[0], e[1], randint(3,8)))
+            community_edges.append((e[0], e[1], randint(INTRA_COMMUNITY_WEIGHT[0],INTRA_COMMUNITY_WEIGHT[1])))
 
         final_graph[0].extend(community_nodes)
         final_graph[1].extend(community_edges)
         ionodes.append((community_nodes[0], community_nodes[1]))
     
     for i in range(NUMBER_OF_COMMUNITY) :
-        final_graph[1].append((ionodes[i][1], ionodes[(i+1) % NUMBER_OF_COMMUNITY][0], 1))
+        final_graph[1].append((ionodes[i][1], ionodes[(i+1) % NUMBER_OF_COMMUNITY][0], INTER_COMMUNITY_WEIGHT))
     
+    shuffle(final_graph[0])
+    shuffle(final_graph[1])
+
     prelude = "graph graphe_genere {\n\tnode [shape=circle, style=filled, color=lightyellow, fontcolor=black];\n\tedge [color=black, fontcolor=blue];\n"
     postlude = "\n}\n"
 

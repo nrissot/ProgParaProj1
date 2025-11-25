@@ -165,9 +165,9 @@ int main(int argc, char* argv[]) {
         candidates_per_value = new std::vector<std::vector<int>>;
         // nprocs+1 car certains processus peuvent "voter" pour un noeud n'étant pas dans leur fragment, et donc les valeurs peuvent aller de 0 à nprocs inclus.
         (*candidates_per_value).resize(nprocs+1); // retirer le -1 une fois l'init fix
-        affichage(reduced_candidates, 1, nb_nodes, 2, INF);
+        // affichage(reduced_candidates, 1, nb_nodes, 2, INF); // DEBUG:TODO:DELETEME
         candidates_globaux = process_candidates(candidates_per_value,reduced_candidates,nb_nodes,K);
-        affichage(candidates_globaux, 1, K, 2, INF);
+        // affichage(candidates_globaux, 1, K, 2, INF); // DEBUG:TODO:DELETEME
         delete candidates_per_value;
     }
 
@@ -181,16 +181,25 @@ int main(int argc, char* argv[]) {
         changement = 0;
         MPI_Bcast(candidates_globaux,K,MPI_INT,root,MPI_COMM_WORLD);
         calcul_cout_swap(candidates_globaux, cout_locaux,mat_distances_fragment, K, nb_nodes, recvcount/nb_nodes);
+        if(pid == 2) {
+            // DEBUG:TODO:DELETEME
+            cout << "information about pid 2" << endl;
+            cout << "fragment" << endl;
+            affichage(mat_distances_fragment,recvcount/nb_nodes,nb_nodes,4,-666);
+            cout << "cout locaux" << endl;
+            affichage(cout_locaux,K,nb_nodes,4,-666);
+        }
         MPI_Reduce(cout_locaux,cout_globaux_reduced,nb_nodes*K,MPI_INT,MPI_SUM,root,MPI_COMM_WORLD);
         if(pid == root){
-            cout << "tableau des couts globeaux reduces : " << endl;
-            affichage(cout_globaux_reduced,nb_nodes * K,1,2,K);
+            // cout << "tableau des couts globeaux reduces : " << endl; // DEBUG:TODO:DELETEME
+            // affichage(cout_globaux_reduced,nb_nodes * K,1,2,K); // DEBUG:TODO:DELETEME
             changement = choix_nouveaux_candidats(nb_nodes,cout_globaux_reduced, K,candidates_globaux);
         }
         MPI_Bcast(&changement,1,MPI_INT,root,MPI_COMM_WORLD);
     }
 
     if (pid == root) {
+        // DEBUG:TODO:DELETEME
         affichage(candidates_globaux, 1, K, 2, INF);
         cout << "le nombre de pass est de : " << nb_pass << endl;
     }    
