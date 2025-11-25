@@ -158,7 +158,7 @@ int main(int argc, char* argv[]) {
     int* cout_globaux_reduced;
     if(pid != root){
         //Buffer de reception lors du broadcast des candidats.
-        candidates_globaux = new int[nb_nodes];
+        candidates_globaux = new int[K];
     }
     if (pid == root) {
         cout_globaux_reduced = new int[nb_nodes*K]; // *K ?
@@ -175,19 +175,24 @@ int main(int argc, char* argv[]) {
 
     int* cout_locaux = new int[nb_nodes*K];
     int changement = 1;
-    while(changement){
+    int nb_pass = 0;
+    while(changement == 1){
+        nb_pass++;
         changement = 0;
-        MPI_Bcast(candidates_globaux,nb_nodes,MPI_INT,root,MPI_COMM_WORLD);
+        MPI_Bcast(candidates_globaux,K,MPI_INT,root,MPI_COMM_WORLD);
         calcul_cout_swap(candidates_globaux, cout_locaux,mat_distances_fragment, K, nb_nodes, recvcount/nb_nodes);
         MPI_Reduce(cout_locaux,cout_globaux_reduced,nb_nodes*K,MPI_INT,MPI_SUM,root,MPI_COMM_WORLD);
         if(pid == root){
+            cout << "tableau des couts globeaux reduces : " << endl;
+            affichage(cout_globaux_reduced,nb_nodes * K,1,2,K);
             changement = choix_nouveaux_candidats(nb_nodes,cout_globaux_reduced, K,candidates_globaux);
         }
         MPI_Bcast(&changement,1,MPI_INT,root,MPI_COMM_WORLD);
     }
 
     if (pid == root) {
-        affichage(candidates_globaux, 1, nb_nodes, 2, INF);
+        affichage(candidates_globaux, 1, K, 2, INF);
+        cout << "le nombre de pass est de : " << nb_pass << endl;
     }    
 
 
