@@ -111,9 +111,8 @@ int main(int argc, char* argv[]) {
     
     if (pid == root) { 
         mat_distances = repareAfterGather(nb_nodes, mat_gathered);
+        affichage(mat_distances, nb_nodes, nb_nodes, 3, INF); // TODO:DEBUG:DELETEME
     }
-
-    // if we need to shuffle, do it here.
 
     int *displs, *sendcount;
 
@@ -150,68 +149,26 @@ int main(int argc, char* argv[]) {
     }
 
     MPI_Reduce(local_chosen_candidates,reduced_candidates,nb_nodes,MPI_INT,MPI_SUM,root,MPI_COMM_WORLD);
+    if (pid == root) {
+        cout << "local chosen candidates (reduced)" << endl;
+        affichage(reduced_candidates, 1,nb_nodes, 3, INF);
+    }
+
+    // 1. on extrait les meilleurs candidats (sans vecteurs, on va faire simple, mais pas rapide -> expansion et ou rapport)
+    // 2. bcast les candidats
+    // 3.1 une passe de PAM
+    // 3.2 on reduce les résultats de la passe
+    // 3.3 on regarde si on a une amélioration
+    // 3.3.1 oui, on modifie, on bcast, retour à 3.1
+    // 3.3.2 non, on sort de la boucle
+    // 4 on affiche les meilleurs médoïdes.
+    
     // On a plus besoin du tableau des candidats locaux
     delete[] local_chosen_candidates;
-
-    std::vector<std::vector<int>>* candidates_per_value;
-    int* candidates_globaux;
-    int* cout_globaux_reduced;
-    if(pid != root){
-        //Buffer de reception lors du broadcast des candidats.
-        candidates_globaux = new int[K];
-    }
-    if (pid == root) {
-        cout_globaux_reduced = new int[nb_nodes*K]; // *K ?
-        candidates_per_value = new std::vector<std::vector<int>>;
-        // nprocs+1 car certains processus peuvent "voter" pour un noeud n'étant pas dans leur fragment, et donc les valeurs peuvent aller de 0 à nprocs inclus.
-        (*candidates_per_value).resize(nprocs+1); // retirer le -1 une fois l'init fix
-        // affichage(reduced_candidates, 1, nb_nodes, 2, INF); // DEBUG:TODO:DELETEME
-        candidates_globaux = process_candidates(candidates_per_value,reduced_candidates,nb_nodes,K);
-        // affichage(candidates_globaux, 1, K, 2, INF); // DEBUG:TODO:DELETEME
-        delete candidates_per_value;
-    }
-
-    // On écrira dans ce tableau le cout local pour un changement de médoide pour un autre noeud. Et ce, pour l'ensemble des médoides (donc K tableau de cout).
-
-    int* cout_locaux = new int[nb_nodes*K];
-    int changement = 1;
-    int nb_pass = 0;
-    while(changement == 1){
-        nb_pass++;
-        changement = 0;
-        MPI_Bcast(candidates_globaux,K,MPI_INT,root,MPI_COMM_WORLD);
-        calcul_cout_swap(candidates_globaux, cout_locaux,mat_distances_fragment, K, nb_nodes, recvcount/nb_nodes);
-        if(pid == 2) {
-            // DEBUG:TODO:DELETEME
-            cout << "information about pid 2" << endl;
-            cout << "fragment" << endl;
-            affichage(mat_distances_fragment,recvcount/nb_nodes,nb_nodes,4,-666);
-            cout << "cout locaux" << endl;
-            affichage(cout_locaux,K,nb_nodes,4,-666);
-        }
-        MPI_Reduce(cout_locaux,cout_globaux_reduced,nb_nodes*K,MPI_INT,MPI_SUM,root,MPI_COMM_WORLD);
-        if(pid == root){
-            // cout << "tableau des couts globeaux reduces : " << endl; // DEBUG:TODO:DELETEME
-            // affichage(cout_globaux_reduced,nb_nodes * K,1,2,K); // DEBUG:TODO:DELETEME
-            changement = choix_nouveaux_candidats(nb_nodes,cout_globaux_reduced, K,candidates_globaux);
-        }
-        MPI_Bcast(&changement,1,MPI_INT,root,MPI_COMM_WORLD);
-    }
-
-    if (pid == root) {
-        // DEBUG:TODO:DELETEME
-        affichage(candidates_globaux, 1, K, 2, INF);
-        cout << "le nombre de pass est de : " << nb_pass << endl;
-    }    
-
-
-
-    delete[] cout_locaux;
-    delete[] mat_distances_fragment;
     
+
+    delete[] mat_distances_fragment;
     if (pid == root) {
-        delete[] cout_globaux_reduced;
-        delete[] candidates_globaux;
         delete[] mat_adjacence;
         delete[] mat_preparee;
         delete[] mat_gathered;
