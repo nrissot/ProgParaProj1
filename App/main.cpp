@@ -38,15 +38,15 @@ int main(int argc, char* argv[]) {
         
         mat_adjacence = lectureGraphe(file_name,&nb_nodes,&my_nodes);
 
-        cout << "matrice d'adjacence" << endl;
-        affichage(mat_adjacence,nb_nodes,nb_nodes,2, INF);
-        cout << endl;
+        // cout << "matrice d'adjacence" << endl;
+        // affichage(mat_adjacence,nb_nodes,nb_nodes,2, INF);
+        // cout << endl;
         
         mat_preparee = prepareForScatter(nb_nodes, mat_adjacence);
         
-        cout << "matrice préparée" << endl;
-        affichage(mat_preparee,nb_nodes,nb_nodes,2,INF);
-        cout << endl;
+        // cout << "matrice préparée" << endl;
+        // affichage(mat_preparee,nb_nodes,nb_nodes,2,INF);
+        // cout << endl;
     }
     
     MPI_Bcast(&nb_nodes, 1, MPI_INT, root, MPI_COMM_WORLD);
@@ -111,12 +111,13 @@ int main(int argc, char* argv[]) {
     
     if (pid == root) { 
         mat_distances = repareAfterGather(nb_nodes, mat_gathered);
-        affichage(mat_distances, nb_nodes, nb_nodes, 3, INF); // TODO:DEBUG:DELETEME
+        // affichage(mat_distances, nb_nodes, nb_nodes, 3, INF); // TODO:DEBUG:DELETEME
     }
 
     int *displs, *sendcount;
 
-    int recvcount = (nb_nodes%nprocs >= pid) ? (((nb_nodes/nprocs)+1)*nb_nodes) : ((nb_nodes/nprocs)*nb_nodes); 
+    int nb_lignes = (nb_nodes%nprocs >= pid) ? ((nb_nodes/nprocs)+1) : (nb_nodes/nprocs);
+    int recvcount = nb_lignes * nb_nodes; 
     int* mat_distances_fragment = new int[recvcount];
 
     if (pid == root) {
@@ -154,27 +155,91 @@ int main(int argc, char* argv[]) {
         affichage(reduced_candidates, 1,nb_nodes, 3, INF);
     }
 
-    // 1. on extrait les meilleurs candidats (sans vecteurs, on va faire simple, mais pas rapide -> expansion et ou rapport)
-    // 2. bcast les candidats
-    // 3.1 une passe de PAM
-    // 3.2 on reduce les résultats de la passe
-    // 3.3 on regarde si on a une amélioration
-    // 3.3.1 oui, on modifie, on bcast, retour à 3.1
-    // 3.3.2 non, on sort de la boucle
-    // 4 on affiche les meilleurs médoïdes.
-    
-    // On a plus besoin du tableau des candidats locaux
+    // TODO NOUVEAUX CODE NATHAN 2025.11.25
+
+    int *medoids = new int[K];
+
+    if (pid == root) {
+        //                    max amount of votes a medoid can receive ↓ (if it shoot to high, can add a max() pass before).
+        medoids = get_k_best_elt(reduced_candidates, nb_nodes, K, nprocs-1);
+    }
+
+    MPI_Bcast(medoids, K, MPI_INT, root, MPI_COMM_WORLD);
+
+    int start_cost = calculate_cost_fragment(medoids, K, mat_distances_fragment, nb_nodes, nb_lignes);
+    int global_cost = 0;
+
+    MPI_Reduce(&start_cost, &global_cost, 1, MPI_INT, MPI_SUM, root, MPI_COMM_WORLD);
+
+    if (pid == root) {
+        // TODO:DELETEME:DEBUG
+        cout << "starting cost : " << global_cost << endl ;
+        affichage(medoids, 1, K, 3, INF);
+    }
+
+    int *permutations = new int[K*K];
+    int *permutation_cost = new int[K];
+    int *temp = new int[K];
+
+
+    for (int i=0; i < nb_nodes; ++i) {
+        if (pid == root) {
+            // generate the permutations
+            if (!is_in(medoids, i, K)) {
+                for (int j = 0; j < K; ++j) {
+                    for (int k=0; k < K; ++k) {
+                        permutations[j*K + k] = ((j == k) ? i : medoids[k]);
+                    }
+                }
+            }
+        }
+        MPI_Bcast(permutations, K*K, MPI_INT, root, MPI_COMM_WORLD);
+
+        for (int j = 0; j < K; ++j) {
+            permutation_cost[j] = calculate_cost_fragment(&permutations[j*K], K, mat_distances_fragment, nb_nodes, nb_lignes);
+        }
+
+
+        MPI_Reduce(permutation_cost, temp, K, MPI_INT, MPI_SUM, root, MPI_COMM_WORLD);
+
+        memcpy(permutation_cost, temp, K * sizeof(int));
+        
+
+        if (pid == root) {
+            int best_cost_index = min_elt_index(permutation_cost, K);
+            int new_cost = permutation_cost[best_cost_index];
+            if (new_cost < global_cost) {
+                // make the permutation
+                global_cost = new_cost;
+                memcpy(medoids, &permutations[best_cost_index*K], K * sizeof(int));
+            }
+        }
+
+        // TODO:OPTIMIZE:MAYBE: can this be optimized ? how can we know when we dont need to bcast ?
+        MPI_Bcast(medoids, K, MPI_INT, root, MPI_COMM_WORLD);
+    }
+
+    if (pid == root) {
+        // TODO:DELETEME:DEBUG
+        cout << "ending cost : " << global_cost << endl ;
+        affichage(medoids, 1, K, 3, INF);
+    }
+
     delete[] local_chosen_candidates;
     
-
+    delete[] medoids;
+    delete[] permutations;
+    delete[] permutation_cost;
+    delete[] temp;
     delete[] mat_distances_fragment;
+    
     if (pid == root) {
         delete[] mat_adjacence;
         delete[] mat_preparee;
         delete[] mat_gathered;
         delete[] mat_distances;
         delete[] reduced_candidates;
-    }
+    }    
     
     MPI_Finalize();
     return 0;

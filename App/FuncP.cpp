@@ -4,22 +4,25 @@
 
 // ____ PRIVATE HELPERS ________________________________________________________________________________________________
 
-/**
- * @brief fonction helper privée pour verifier la présence d'un element dans un tableau.
- * 
- * @param tab le tableau (de taille len).
- * @param elt l'élément recherché.
- * @param len la taille de tab.
- * 
- * @return 1 si l'élément est présent, 0 sinon.
- */
-int is_in(int* tab, int elt, int len) {
+bool is_in(int* tab, int elt, int len) {
     for (int i = 0; i < len; ++i) {
         if (tab[i] == elt) {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
+}
+
+int min_elt_index(int *tab, int len) {
+    int min = tab[0];
+    int idx = 0;
+    for (int i = 1; i < len; ++i) {
+        if (tab[i] < min) {
+            min = tab[i];
+            idx = i;
+        } 
+    }
+    return idx;
 }
 
 /**
@@ -314,4 +317,42 @@ int choix_nouveaux_candidats(int nb_nodes, int *cout_global_reduced, int k, int 
         }
     }
     return flag;
+}
+
+// NOUVELLES FONCTIONS NATHAN 2025.11.25
+
+int *get_k_best_elt(int *tab, int length, int k, int max) {
+    // kinda shitty time complexity, ~~> O(nb_node * (nprocs-1)), OK-ish on average.
+    // can be improved with a O(n*logn) sorting algorithm and a bit more space complexity
+
+    int* out = new int[k];
+    int cursor = 0;
+
+    for (int i = max; i >= 0; --i) {
+        for (int j = 0; j < length; ++j) {
+            if (tab[j] == i) {
+                // increment AFTER use, so it's fine.
+                out[cursor++] = j;
+                if (cursor >= k) {
+                    break;
+                }
+            }
+        }
+    }
+    return out;
+}
+
+int calculate_cost_fragment(int *medoids, int K, int *mat_distance_fragment, int nb_nodes, int nb_lignes) {
+    int sum = 0;
+
+    for (int i=0; i < nb_lignes; ++i) {
+        int min = mat_distance_fragment[i*nb_nodes + medoids[0]];
+        for (int j =1; j < K; ++j) {
+            if (mat_distance_fragment[i*nb_nodes + medoids[j]] < min) {
+                min = mat_distance_fragment[i*nb_nodes + medoids[j]];
+            }
+        }
+        sum += min;
+    }
+    return sum;
 }

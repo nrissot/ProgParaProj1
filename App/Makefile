@@ -14,6 +14,9 @@ main: main.o ForGraph.o FuncP.o Utils.o
 run:
 	mpirun -np 16 --oversubscribe ./main "exemples/exported_graph.dot" 4
 
+mem:
+	valgrind mpirun -np 16 --oversubscribe ./main "exemples/exported_graph.dot" 4
+
 # Pattern rule: build object file from .cpp
 %.o: %.cpp
 	$(CXX) -c $< -o $@ $(CXXFLAGS)

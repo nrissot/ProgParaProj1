@@ -89,4 +89,48 @@ void calcul_cout_swap(int* current_candidates, int* cout_locaux,int* mat_distanc
 */
 int choix_nouveaux_candidats(int nb_nodes,int* cout_global_reduced, int k, int* current_candidates);
 
+// NOUVELLES FONCTIONS NATHAN 2025.11.25
+/**
+ * @brief calcule et retourne les indices des k meilleurs élement du tableau passé en paramètre
+ * @param tab le tableau (de taille length) des options
+ * @param k le nombre d'élements voulus.
+ * @param max la valeur maximum que peut prendre un élément
+ * @return un tableau de taille k des meilleurs éléments.
+ */
+int* get_k_best_elt(int* tab, int length, int k, int max) ;
+
+/**
+ * @brief verifie la présence d'un element dans un tableau en temps O(len).
+ * 
+ * @param tab le tableau (de taille len).
+ * @param elt l'élément recherché.
+ * @param len la taille de tab.
+ * 
+ * @return true si l'élément est présent, false sinon.
+ */
+bool is_in(int* tab, int elt, int len);
+
+/**
+ * @brief retourne l'index du plus petit element du tableau en temps O(len).
+ * 
+ * @param tab le tableau (de taille len)
+ * @param len la taille du tableau tab
+ * 
+ * @return l'index du plus petit element du tableau 
+ */
+int min_elt_index(int* tab, int len);
+
+/**
+ * @brief calcule le fragment de cout pour les médoïdes passé en paramètres en temps O(nb_lignes*k)
+ * 
+ * @param medoids le tableau des indices des médoïdes (de taille k)
+ * @param k le nombre de médoides
+ * @param mat_distance_fragment le fragment de la matrice des distances (de taille nb_nodes * nb_lignes)
+ * @param nb_nodes le nombre de noeuds du graphe, la largeur de mat_distance_fragment
+ * @param nb_lignes le nombre de lignes du fragement, la hauteur de mat_distance_fragment
+ * 
+ * @return la somme des distances des (nb_lignes) noeud du fragment avec leur plus proche médoïde 
+ */
+int calculate_cost_fragment(int* medoids, int k, int* mat_distance_fragment, int nb_nodes, int nb_lignes);
+
 #endif //FUNCP_HPP
