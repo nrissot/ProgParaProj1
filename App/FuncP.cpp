@@ -327,6 +327,7 @@ int *get_k_best_elt(int *tab, int length, int k, int max) {
 
     int* out = new int[k];
     int cursor = 0;
+    bool should_break = false;
 
     for (int i = max; i >= 0; --i) {
         for (int j = 0; j < length; ++j) {
@@ -334,9 +335,13 @@ int *get_k_best_elt(int *tab, int length, int k, int max) {
                 // increment AFTER use, so it's fine.
                 out[cursor++] = j;
                 if (cursor >= k) {
+                    should_break = true;
                     break;
                 }
             }
+        }
+        if (should_break) {
+            break;
         }
     }
     return out;
