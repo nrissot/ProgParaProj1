@@ -36,17 +36,8 @@ int main(int argc, char* argv[]) {
         char* file_name = argv[1];
         map<string,int> my_nodes; // Dans le .dot les sommets sont désignés par un nom 
         
-        mat_adjacence = lectureGraphe(file_name,&nb_nodes,&my_nodes);
-
-        // cout << "matrice d'adjacence" << endl;
-        // affichage(mat_adjacence,nb_nodes,nb_nodes,2, INF);
-        // cout << endl;
-        
+        mat_adjacence = lectureGraphe(file_name,&nb_nodes,&my_nodes);        
         mat_preparee = prepareForScatter(nb_nodes, mat_adjacence);
-        
-        // cout << "matrice préparée" << endl;
-        // affichage(mat_preparee,nb_nodes,nb_nodes,2,INF);
-        // cout << endl;
     }
     
     MPI_Bcast(&nb_nodes, 1, MPI_INT, root, MPI_COMM_WORLD);
@@ -111,7 +102,6 @@ int main(int argc, char* argv[]) {
     
     if (pid == root) { 
         mat_distances = repareAfterGather(nb_nodes, mat_gathered);
-        // affichage(mat_distances, nb_nodes, nb_nodes, 3, INF); // TODO:DEBUG:DELETEME
     }
 
     int *displs, *sendcount;

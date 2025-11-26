@@ -1,6 +1,5 @@
 #include "FuncP.hpp"
 #include <iostream>  // TODO:DELETEME
-#include "Utils.hpp" // TODO:DELETEME
 
 // ____ PRIVATE HELPERS ________________________________________________________________________________________________
 
@@ -264,59 +263,6 @@ int *findLocalMedoidCandidate(int *mat_distance_fragment, int k, int nb_nodes, i
     }
     delete[] candidates;
     return candidates_flags;
-}
-
-int* process_candidates(std::vector<std::vector<int>>* datastruct,int* data_to_process,int nb_noeud,int nb_medoides){
-    int medoides_added = 0; 
-    int* data_processed = new int[nb_medoides];
-    // on parcours data to process et on remplit datastruct.
-    for(int i = 0;i<nb_noeud;++i){
-        (*datastruct)[data_to_process[i]].push_back(i);
-    }
-    for (int i = (*datastruct).size() - 1; i >= 0; --i) {
-        for(int j = 0 ; j < (*datastruct)[i].size();j++){
-            data_processed[medoides_added] = (*datastruct)[i][j];
-            medoides_added++;
-            if(medoides_added==nb_medoides){
-                break;
-            }
-        }
-        if(medoides_added==nb_medoides){
-            break;
-        }
-    }
-
-    return data_processed;
-}
-
-void calcul_cout_swap(int *current_candidates, int *cout_locaux, int *mat_distance_fragment, int k, int nb_nodes, int nb_lignes_fragment) {
-    int *new_candidates = new int[k];
-
-    for (int i = 0; i < k; ++i) {
-        for (int j = 0; j < nb_nodes; ++j) {
-            // if the current index is not already a candidates
-            if (!is_in(current_candidates, j, k)) {
-                memcpy(new_candidates, current_candidates,k*sizeof(int));
-                new_candidates[i] = j;
-                cout_locaux[(i*nb_nodes)+j] = cost_from_candidate_set(mat_distance_fragment, new_candidates, k, nb_nodes, nb_lignes_fragment);
-            }
-        }
-    }
-}
-
-int choix_nouveaux_candidats(int nb_nodes, int *cout_global_reduced, int k, int *current_candidates) {
-    int flag = 0;
-    for (int i = 0; i < k; ++i) {
-        int optimal_cost = INF;
-        for (int j = 0; j < nb_nodes; ++j) {
-            if (!is_in(current_candidates,j,k) && cout_global_reduced[(i*nb_nodes)+j] < optimal_cost) {
-                optimal_cost = cout_global_reduced[(i*nb_nodes)+j];
-                current_candidates[i] = j;
-                flag = 1;
-            }
-        }
-    }
-    return flag;
 }
 
 // NOUVELLES FONCTIONS NATHAN 2025.11.25
