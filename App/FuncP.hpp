@@ -19,7 +19,7 @@ using namespace std;
  * @param mat_adjacence la matrice d'adjacence (de taille nb_nodes × nb_nodes).
  * @return int* une copie de la matrice d'adjacence préparée pour le scatter.
  */
-int* prepareForScatter(int nb_nodes, int* mat_adjacence);
+int* prepareForScatter(int nb_nodes, int* mat_adjacence); //DEBUG:x
 
 /**
  * @brief permet de remettre en forme la matrice reçue pour la reconvertir en matrice d'adjacence 
@@ -29,7 +29,7 @@ int* prepareForScatter(int nb_nodes, int* mat_adjacence);
  * @param mat_adjacence la matrice reçue (de taille nb_nodes × nb_nodes).
  * @return int* la matrice d'adjacence remise en forme.
  */
-int* repareAfterGather(int nb_nodes, int* gathered_mat);
+int* repareAfterGather(int nb_nodes, int* gathered_mat); //DEBUG:x
 
 /**
  * @brief effectue l'algorithme de Roy-Floyd-Warshall sur le fragment de la matrice d'adjacence dédié
@@ -40,7 +40,7 @@ int* repareAfterGather(int nb_nodes, int* gathered_mat);
  * @param MPI_COMM_COL le communicateur en colonne
  * @param MPI_COMM_LINE le communicateur en ligne
  */
-void scatteredFloydAlgorithm(int* bloc, int b, int nb_nodes, MPI_Comm MPI_COMM_COL, MPI_Comm MPI_COMM_LINE);
+void scatteredFloydAlgorithm(int* bloc, int b, int nb_nodes, MPI_Comm MPI_COMM_COL, MPI_Comm MPI_COMM_LINE); //DEBUG:x
 
 
 /**
@@ -56,15 +56,50 @@ void scatteredFloydAlgorithm(int* bloc, int b, int nb_nodes, MPI_Comm MPI_COMM_C
  * L'index i vaut 1 (resp. 0) si le i-ème noeud a été choisis (resp. n'a pas été choisit) comme médoïde.
  * Le tableau retourné aura exactement k valeurs 1 et nb_nodes - k valeurs 0
  */
-int* findLocalMedoidCandidate(int* mat_distance_fragment, int k, int nb_nodes, int nb_lignes_fragment);
+int* findLocalMedoidCandidate(int* mat_distance_fragment, int k, int nb_nodes, int nb_lignes_fragment); //DEBUG:x
+
+// NOUVELLES FONCTIONS NATHAN 2025.11.25
+/**
+ * @brief calcule et retourne les indices des k meilleurs élement du tableau passé en paramètre
+ * @param tab le tableau (de taille length) des options
+ * @param k le nombre d'élements voulus.
+ * @param max la valeur maximum que peut prendre un élément
+ * @return un tableau de taille k des meilleurs éléments.
+ */
+int* get_k_best_elt(int* tab, int length, int k, int max) ; //DEBUG:x
 
 /**
-* @brief  Traiter le tableau reduced des candidats locaux.
-* @param  dadastruct un vecteur temporaire pour le traitement.
-* @param  data_to_process le tableau réduit des candidats locaux.
-* @param  nb_medoides le nombre de medoides voulu.
-* @param  nb_noeud le nombre de noeud de notre matrice de distance.
-* @return tableau des candidats globaux choisis.
+ * @brief verifie la présence d'un element dans un tableau en temps O(len).
+ * 
+ * @param tab le tableau (de taille len).
+ * @param elt l'élément recherché.
+ * @param len la taille de tab.
+ * 
+ * @return true si l'élément est présent, false sinon.
  */
-int* process_candidates(std::vector<std::vector<int>>* dadastruct,int* data_to_process,int nb_noeud,int nb_medoides);
+bool is_in(int* tab, int elt, int len); //DEBUG:x
+
+/**
+ * @brief retourne l'index du plus petit element du tableau en temps O(len).
+ * 
+ * @param tab le tableau (de taille len)
+ * @param len la taille du tableau tab
+ * 
+ * @return l'index du plus petit element du tableau 
+ */
+int min_elt_index(int* tab, int len); //DEBUG:x
+
+/**
+ * @brief calcule le fragment de cout pour les médoïdes passé en paramètres en temps O(nb_lignes*k)
+ * 
+ * @param medoids le tableau des indices des médoïdes (de taille k)
+ * @param k le nombre de médoides
+ * @param mat_distance_fragment le fragment de la matrice des distances (de taille nb_nodes * nb_lignes)
+ * @param nb_nodes le nombre de noeuds du graphe, la largeur de mat_distance_fragment
+ * @param nb_lignes le nombre de lignes du fragement, la hauteur de mat_distance_fragment
+ * 
+ * @return la somme des distances des (nb_lignes) noeud du fragment avec leur plus proche médoïde 
+ */
+int calculate_cost_fragment(int* medoids, int k, int* mat_distance_fragment, int nb_nodes, int nb_lignes); //DEBUG:x
+
 #endif //FUNCP_HPP

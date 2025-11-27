@@ -1,24 +1,27 @@
 #include "FuncP.hpp"
-#include <iostream> // TODO:DELETEME
+#include <iostream>  // TODO:DELETEME
 
 // ____ PRIVATE HELPERS ________________________________________________________________________________________________
 
-/**
- * @brief fonction helper privée pour verifier la présence d'un element dans un tableau.
- * 
- * @param tab le tableau (de taille len).
- * @param val l'élément recherché.
- * @param len la taille de tab.
- * 
- * @return 1 si l'élément est présent, 0 sinon.
- */
-int is_in(int* tab, int val, int len) {
+bool is_in(int* tab, int elt, int len) {
     for (int i = 0; i < len; ++i) {
-        if (tab[i] == val) {
-            return 1;
+        if (tab[i] == elt) {
+            return true;
         }
     }
-    return 0;
+    return false;
+}
+
+int min_elt_index(int *tab, int len) {
+    int min = tab[0];
+    int idx = 0;
+    for (int i = 1; i < len; ++i) {
+        if (tab[i] < min) {
+            min = tab[i];
+            idx = i;
+        } 
+    }
+    return idx;
 }
 
 /**
@@ -35,12 +38,13 @@ int is_in(int* tab, int val, int len) {
  */
 int cost_from_candidate_set(int *mat_distance_fragment, int* candidates, int k, int nb_nodes, int nb_lignes_fragment) {
     int sum = 0;
-    for(int current_node = 0; current_node < nb_lignes_fragment; current_node++){
+    for(int current_node = 0; current_node < nb_lignes_fragment; current_node++) {
         int min_current = INF;          
-        for (int i = 0 ; i < k; i++){
-            if (mat_distance_fragment[current_node*nb_nodes + candidates[i]] == 0) {
-                return -1;
-            }
+        for (int i = 0 ; i < k; i++) {
+            // NOTE: old way to spot error, shoudlnt happen TODO:DELETEME ?
+            // if (mat_distance_fragment[current_node*nb_nodes + candidates[i]] == 0) {
+            //     return -1;
+            // }
             min_current = min(mat_distance_fragment[current_node*nb_nodes + candidates[i]], min_current);
         }
         sum += min_current;
@@ -200,25 +204,49 @@ int *findLocalMedoidCandidate(int *mat_distance_fragment, int k, int nb_nodes, i
         int current_cost = cost_from_candidate_set(mat_distance_fragment,candidates,k,nb_nodes,nb_lignes_fragment);
         
         int* copy = new int[k];
+        // Array of local index node in our matrix fragment.
+        int* index_locaux = new int[nb_lignes_fragment];
 
+        
+        for (int i = 0; i < nb_lignes_fragment; ++i) {
+            for (int j = 0; j < nb_nodes; ++j) {
+                if(mat_distance_fragment[i*nb_nodes + j] == 0) {
+                    // if the value is the distance from a node to itself, (ie, value=0)
+                    // we add it as a local node.
+                    index_locaux[i] = j;
+                    break;
+                }
+            }
+        }
+        int pid; 
+        MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+
+        // if(pid == 15){
+        //     cout << "affichage du fragment de matrice de 15: " << endl;
+        //     affichage(mat_distance_fragment, nb_lignes_fragment, nb_nodes,2,1000);
+        //     cout << "hmmmm trés intéressant hmm hmm " << endl; // TODO:DELETEME
+
+        // }
+        
+        
         // for each medoid
         for (int i = 0; i < k; ++i) {
             
             // we try every node that is not already a medoid to see if we can lower the cost
             for (int j = 0; j < nb_nodes; ++j) {
                 memcpy(copy,candidates,sizeof(int)*k);
-                if(!is_in(copy,j,k)) {
+                // rajouter "au bout" index_locaux
+
+                if(!is_in(copy,j,k) && !is_in(index_locaux,j,nb_lignes_fragment)) { // && !is_in index_locaux
                     copy[i] = j;
                     int new_cost = cost_from_candidate_set(mat_distance_fragment,copy,k,nb_nodes,nb_lignes_fragment);
                     // if the candidate is not a member of the fragment
-                    if (new_cost != -1) {
-                        if(current_cost > new_cost){
-                            // we can lower the cost, we update the candidates array.
-                            candidates[i]=copy[i];
-    
-                            // we change something, we update the flag.
-                            flag=1;                        
-                        }
+                    if(current_cost > new_cost){
+                        // we can lower the cost, we update the candidates array.
+                        candidates[i]=copy[i];
+
+                        // we change something, we update the flag.
+                        flag=1;                        
                     }
                 }
             }
@@ -228,7 +256,7 @@ int *findLocalMedoidCandidate(int *mat_distance_fragment, int k, int nb_nodes, i
     } while (flag != 0);
     
     int* candidates_flags = new int[nb_nodes]{};
-    //                        ↑ initialise the values of the array to 0
+    //                                       ↑ initialise the values of the array to 0
 
     for (int i = 0; i < k; ++i) {
         candidates_flags[candidates[i]] = 1;
@@ -237,23 +265,45 @@ int *findLocalMedoidCandidate(int *mat_distance_fragment, int k, int nb_nodes, i
     return candidates_flags;
 }
 
-int* process_candidates(std::vector<std::vector<int>>* dadastruct,int* data_to_process,int nb_noeud,int nb_medoides){
-    int medoides_added = 0; 
-    int* data_processed = new int[nb_medoides];
-    for(int i = 0;i<nb_noeud;++i){
-        (*dadastruct)[data_to_process[i]].push_back(i);
-    }for (int i = (*dadastruct).size() - 1; i >= 0; --i) {
-        for(int j = 0 ; j < (*dadastruct)[i].size();j++){
-            data_processed[medoides_added] = (*dadastruct)[i][j];
-            medoides_added++;
-            if(medoides_added==nb_medoides){
-                break;
+// NOUVELLES FONCTIONS NATHAN 2025.11.25
+
+int *get_k_best_elt(int *tab, int length, int k, int max) {
+    // kinda shitty time complexity, ~~> O(nb_node * (nprocs-1)), OK-ish on average.
+    // can be improved with a O(n*logn) sorting algorithm and a bit more space complexity
+
+    int* out = new int[k];
+    int cursor = 0;
+    bool should_break = false;
+
+    for (int i = max; i >= 0; --i) {
+        for (int j = 0; j < length; ++j) {
+            if (tab[j] == i) {
+                // increment AFTER use, so it's fine.
+                out[cursor++] = j;
+                if (cursor >= k) {
+                    should_break = true;
+                    break;
+                }
             }
         }
-        if(medoides_added==nb_medoides){
+        if (should_break) {
             break;
         }
     }
+    return out;
+}
 
-    return data_processed;
+int calculate_cost_fragment(int *medoids, int K, int *mat_distance_fragment, int nb_nodes, int nb_lignes) {
+    int sum = 0;
+
+    for (int i=0; i < nb_lignes; ++i) {
+        int min = mat_distance_fragment[i*nb_nodes + medoids[0]];
+        for (int j =1; j < K; ++j) {
+            if (mat_distance_fragment[i*nb_nodes + medoids[j]] < min) {
+                min = mat_distance_fragment[i*nb_nodes + medoids[j]];
+            }
+        }
+        sum += min;
+    }
+    return sum;
 }
