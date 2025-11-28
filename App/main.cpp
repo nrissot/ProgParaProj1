@@ -14,7 +14,7 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        cout << "Usage : ./main fichier.dot (graphe au format dot) k";
+        cout << "Usage : ./main fichier.dot (graphe au format dot) k" << endl;
         return EXIT_FAILURE;
     }
 

@@ -37,11 +37,13 @@
 *.out
 *.app
 main
+main_arn
 
 # debug information files
 *.dwo
 
 # ide specific
+.vscode
 .vscode/*
 */.vscode/*
 .idea/*
