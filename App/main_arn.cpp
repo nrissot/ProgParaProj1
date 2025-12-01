@@ -1,7 +1,8 @@
 #include <iostream>
 #include <string.h>
-
 #include <mpi.h>
+
+#include <math.h>
 
 #include "ForARN.hpp"
 #include "Utils.hpp"
@@ -18,8 +19,14 @@ int main(int argc, char* argv[]) {
 	const int K = atoi(argv[2]);
 	const int NB_SEQ = atoi(argv[3]);
 
+    // get the number of digits in NB_SEQ
+    // maybe there is a simpler way to do it
+    const int uid_len = ((int) floor(log10(NB_SEQ))) + 1;
+
 	int pid, nprocs;
 	int root = 0;
+
+    string colors[4] = {"aquamarine", "goldenrod1", "hotpink1", "chartreuse"};
 
 	// au cas ou on voudrait gerer des séquences dupliquées.
 	int nb_nodes = NB_SEQ;
@@ -321,6 +328,49 @@ int main(int argc, char* argv[]) {
 
 	// Export (+ calcul des communautées)
 
+    // NODES
+    // C2N20 [label="C2N20",color="darkorchid"];
+
+    if (pid == root) {
+        ofstream ofile;
+        ofile.open("output/arn.dot");
+        ofile.clear();
+        ofile << "graph output_arn {\nnode [shape=circle, style=filled, color=lightyellow, fontcolor=black];\nedge [color=black, fontcolor=blue];\n" << endl;
+        
+        for (int i = 0; i < nb_nodes; ++i) {
+            // find the closest medoid (ie, community)
+            int closest_medoid_idx = 0;
+            int closest_medoid_dist = mat_distances[i*nb_nodes + medoids[0]];
+            for (int k = 1; k < K; ++k) {
+                if (mat_distances[i*nb_nodes + medoids[k]] < closest_medoid_dist) {
+                    closest_medoid_idx = k;
+                    closest_medoid_dist = mat_distances[i*nb_nodes + medoids[k]];
+                }
+            }
+
+            ofile << i << " [label=\"" << i << "\",color=\"" << colors[closest_medoid_idx] ;
+
+            // if the node is a medoid
+            if (closest_medoid_dist == 0) {
+                // make the node bigger and a pentagon instead of an ellipse
+                ofile << "\",fixedsize=true,width=2,height=2,shape=\"pentagon";
+            }
+
+            ofile << "\"];" << endl; ;
+
+            // find the edges
+            // C2N21 -- C2N13 [label="1", weight=1];
+            for (int j = i; j < nb_nodes; ++j) {
+                const int w = mat_distances[i*nb_nodes + j];
+                if (w <= 70 && w != 0) {
+                    ofile << i << " -- " << j << " [label=\"" << w << "\",weight=" << w << "];" << endl ;
+                }
+            }
+        }
+        ofile << "}" << endl;
+        ofile.close();
+    }
+
     // final cleanup
     delete[] medoids;
     delete[] permutations;
@@ -331,7 +381,6 @@ int main(int argc, char* argv[]) {
     if (pid == root) {
         delete[] mat_gathered;
         delete[] mat_distances;
-        // delete[] reduced_candidates;
 		delete[] sequences;
 	}
 	delete[] sequences_fragment;

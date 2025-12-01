@@ -13,6 +13,10 @@ arn_500: main_arn run_arn_500 cleano
 
 arn_20: main_arn run_arn_20 cleano
 
+run_arn_export: run_arn_500 export_to_svg
+
+arn_export: main_arn cleano run_arn_export
+
 # Pattern rule: build executable from .o
 main: main.o ForGraph.o FuncP.o Utils.o
 	$(CXX) -o $@ $^ $(CXXFLAGS)
@@ -30,10 +34,7 @@ run_arn_500:
 	mpirun -np 16 --oversubscribe ./main_arn "exemples/arn/dataset_500seq.fa" 4 500
 
 run_arn_20:
-	mpirun -np 16 --oversubscribe ./main_arn "exemples/arn/dataset_20seq.fa" 4 20
-
-mem:
-	valgrind mpirun -np 16 --oversubscribe ./main "exemples/exported_graph.dot" 4
+	mpirun -np 4 --oversubscribe ./main_arn "exemples/arn/dataset_20seq.fa" 4 20
 
 # Pattern rule: build object file from .cpp
 %.o: %.cpp
@@ -43,5 +44,15 @@ mem:
 cleano:
 	rm -f *.o *~
 
+cleanoutdot:
+	rm -f output/arn.*
+
 clean:
 	rm -f *.o *~ main main_arn
+
+# Externals
+export_to_svg:
+	dot -Tsvg output/arn.dot > output/arn.svg 
+
+mem:
+	valgrind mpirun -np 16 --oversubscribe ./main "exemples/exported_graph.dot" 4
