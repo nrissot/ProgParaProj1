@@ -303,10 +303,8 @@ int main(int argc, char* argv[]) {
 
         MPI_Reduce(permutation_cost, temp, K, MPI_INT, MPI_SUM, root, MPI_COMM_WORLD);
 
-        memcpy(permutation_cost, temp, K * sizeof(int));
-        
-
         if (pid == root) {
+            memcpy(permutation_cost, temp, K * sizeof(int));
             int best_cost_index = min_elt_index(permutation_cost, K);
             int new_cost = permutation_cost[best_cost_index];
             if (new_cost < global_cost) {
