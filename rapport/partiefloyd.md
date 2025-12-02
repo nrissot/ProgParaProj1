@@ -26,3 +26,5 @@ La parallélisation de cet algo repose sur le découpage en $x$ blocs de taille 
 
 En effet, à chaque itération de la boucle, un bloc n'a besoin que d'une ligne de données reçue de sa colonne de blocs, et d'une colonne de donnée reçue de sa ligne de blocs. En partageant donc les blocs entre $x$ coeurs, et en les faisant partager les lignes et colonnes de donnée utiles, on peut effectuer les opérations de comparaisons en simultané, ce qui accélere l'exécution.
 
+![fig x. Exemple de partage de la matrice par bloc](./asset/bloc_share_floyd_schéma_tableau.jpg)
+
