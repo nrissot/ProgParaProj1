@@ -3,7 +3,7 @@
 #include <mpi.h>
 
 #include <math.h>
-
+#include <chrono>
 #include "ForARN.hpp"
 #include "Utils.hpp"
 #include "FuncP.hpp"
@@ -15,6 +15,8 @@ int main(int argc, char* argv[]) {
 		cout << "Usage : ./arn <fichier.fa> <k> <nb_seq>" << endl;
 		return EXIT_FAILURE;
 	}
+
+    auto t_start = std::chrono::high_resolution_clock::now();
 
 	const int K = atoi(argv[2]);
 	const int NB_SEQ = atoi(argv[3]);
@@ -34,12 +36,14 @@ int main(int argc, char* argv[]) {
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+    auto t_init = std::chrono::high_resolution_clock::now();
 
 	char* sequences;
 
 	if (pid == root) {
         sequences = readArnFromFile(argv[1], NB_SEQ);
 	}
+    auto t_lecture = std::chrono::high_resolution_clock::now();
 
     
 	int *displs, *sendcount;
@@ -79,7 +83,6 @@ int main(int argc, char* argv[]) {
 	// dont have an overload.
 	char* recv_buffer = new char[((nb_nodes/nprocs)+1) * TAILLESEQ];
 
-    MPI_Barrier(MPI_COMM_WORLD);
     
 	int next_nb_lignes;
 	int next_recvcount;
@@ -104,10 +107,8 @@ int main(int argc, char* argv[]) {
             next_offset = (i < nb_nodes%nprocs) ? (i * ((nb_nodes/nprocs)+1)) : ((nb_nodes%nprocs) * ((nb_nodes/nprocs)+1) + (i - (nb_nodes%nprocs)) * (nb_nodes/nprocs));
 		}
         
-        MPI_Barrier(MPI_COMM_WORLD);
 		MPI_Bcast(recv_buffer, next_recvcount, MPI_CHAR, i, MPI_COMM_WORLD);
 
-        MPI_Barrier(MPI_COMM_WORLD);
 
 		// if (pid != i) {
             // ajout des distance à la matrice d'adjacence
@@ -127,7 +128,8 @@ int main(int argc, char* argv[]) {
 	}
 
 	MPI_Reduce(matrice_adjacence, temp, nb_nodes*nb_nodes, MPI_INT, MPI_SUM, root, MPI_COMM_WORLD);
-    
+    auto t_matrice_adjacence = std::chrono::high_resolution_clock::now();
+
     // if (pid == root) {
     //     // TODO:DELETEME:DEBUG
     //     cout << "matrice d'adjacence" << endl;
@@ -210,6 +212,7 @@ int main(int argc, char* argv[]) {
     //     affichage(mat_distances, nb_nodes, nb_nodes, 3, INF);
     // }
 
+    auto t_fin_floyd = std::chrono::high_resolution_clock::now();
 
 	// PAM pour calculer les k-médoïdes
     
@@ -239,8 +242,32 @@ int main(int argc, char* argv[]) {
         delete[] sendcount;
     }
     
-    int* local_chosen_candidates = findLocalMedoidCandidate(mat_distances_fragment, K, nb_nodes, (nb_nodes / nprocs));
-    
+    int* local_chosen_candidates;
+
+    if (nprocs > 1) {
+        local_chosen_candidates = findLocalMedoidCandidate(mat_distances_fragment, K, nb_nodes, (nb_nodes / nprocs));
+    } else  {
+        // special test case for a sequential execution (mpirun -np 1) of the algorithm
+        local_chosen_candidates = new int[K];
+        srand(time({})); // use current time as seed for the RNG.
+        for (int i = 0; i < K; ++i) {
+            int choice = rand() % nb_nodes;
+            int flag = 0;
+            // check if the chosen medoid was not already chosen.
+            for (int j = 0; j < i; ++j) {
+                if (local_chosen_candidates[j] == choice) {
+                    flag =1;
+                    break;
+                }
+            }
+            if (flag == 0) {
+                local_chosen_candidates[i] = choice;
+            } else {
+                // we have to try again
+                --i;
+            }
+        }
+    }
     int* reduced_candidates;
     
     if (pid == root) {
@@ -317,6 +344,7 @@ int main(int argc, char* argv[]) {
         // TODO:OPTIMIZE:MAYBE: can this be optimized ? how can we know when we dont need to bcast ?
         MPI_Bcast(medoids, K, MPI_INT, root, MPI_COMM_WORLD);
     }
+    auto t_fin_pam = std::chrono::high_resolution_clock::now();
 
     if (pid == root) {
         // TODO:DELETEME:DEBUG
@@ -385,5 +413,30 @@ int main(int argc, char* argv[]) {
     delete[] matrice_adjacence;
 
 	MPI_Finalize();
+    if(pid == root)
+    {
+        using std::chrono::duration;
+        using std::chrono::duration_cast;
+        using std::chrono::high_resolution_clock;
+        using std::chrono::milliseconds;
+
+        duration<double, std::milli> ms_double_total = t_fin_pam - t_start;
+        std::cout<<"temps total : " << ms_double_total.count() << "ms" << endl;
+        
+        duration<double, std::milli> ms_double_init = t_init - t_start;
+        std::cout<<"temps init : " << ms_double_init.count() << "ms" << endl;
+
+        duration<double, std::milli> ms_double_lecture = t_lecture - t_init;
+        std::cout<<"temps lecture : " << ms_double_lecture.count() << "ms" << endl;
+
+        duration<double, std::milli> ms_double_distance = t_matrice_adjacence - t_lecture;
+        std::cout<<"temps matrice distance : " << ms_double_distance.count() << "ms" << endl;
+
+        duration<double, std::milli> ms_double_floyd = t_fin_floyd - t_matrice_adjacence;
+        std::cout<<"temps floyd : " << ms_double_floyd.count() << "ms" << endl;
+
+        duration<double, std::milli> ms_double_pam = t_fin_pam - t_fin_floyd;
+        std::cout<<"temps pam : " << ms_double_pam.count() << "ms" << endl;
+    }
 	return 0;
 }
