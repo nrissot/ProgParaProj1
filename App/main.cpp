@@ -68,8 +68,8 @@ int main(int argc, char* argv[]) {
     int* periods = new int[2]{0,0};
 
     // Definitions des dimensions à garder pour la création des communicateurs par Cart_sub
-    int* remain_dims_col = new int[2]{0,1};
-    int* remain_dims_line = new int[2]{1,0};
+    int* remain_dims_col = new int[2]{1,0};
+    int* remain_dims_line = new int[2]{0,1};
 
     MPI_Comm MPI_COMM_CART;
     MPI_Comm MPI_COMM_COL;
@@ -78,18 +78,18 @@ int main(int argc, char* argv[]) {
     
     MPI_Cart_create(MPI_COMM_WORLD, 2, ndims, periods, false, &MPI_COMM_CART);
 
-    MPI_Cart_sub(MPI_COMM_CART, remain_dims_col, &MPI_COMM_COL);
-    MPI_Cart_sub(MPI_COMM_CART, remain_dims_line, &MPI_COMM_LINE);         
+    MPI_Cart_sub(MPI_COMM_CART, remain_dims_col, &MPI_COMM_COL);         
+    MPI_Cart_sub(MPI_COMM_CART, remain_dims_line, &MPI_COMM_LINE);
 
 
     // Libération des divers array utilisés pour la séparation du 
     // communicateur world en grille.
     delete[] ndims;
     delete[] periods;
-    delete[] remain_dims_line;
     delete[] remain_dims_col;
+    delete[] remain_dims_line;
 
-    scatteredFloydAlgorithm(bloc, b, nb_nodes, MPI_COMM_COL, MPI_COMM_LINE);
+    scatteredFloydAlgorithm(bloc, b, nb_nodes, MPI_COMM_LINE, MPI_COMM_COL);
 
     int *mat_gathered, *mat_distances;
 
@@ -102,7 +102,10 @@ int main(int argc, char* argv[]) {
     
     if (pid == root) { 
         mat_distances = repareAfterGather(nb_nodes, mat_gathered);
+        affichage(mat_distances, nb_nodes, nb_nodes, 3, INF);
     }
+    
+    #if 0
 
     int *displs, *sendcount;
 
@@ -192,10 +195,8 @@ int main(int argc, char* argv[]) {
 
         MPI_Reduce(permutation_cost, temp, K, MPI_INT, MPI_SUM, root, MPI_COMM_WORLD);
 
-        memcpy(permutation_cost, temp, K * sizeof(int));
-        
-
         if (pid == root) {
+            memcpy(permutation_cost, temp, K * sizeof(int));
             int best_cost_index = min_elt_index(permutation_cost, K);
             int new_cost = permutation_cost[best_cost_index];
             if (new_cost < global_cost) {
@@ -231,6 +232,8 @@ int main(int argc, char* argv[]) {
         delete[] reduced_candidates;
     }    
     
+    #endif
+
     MPI_Finalize();
     return 0;
 }

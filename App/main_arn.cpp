@@ -1,7 +1,8 @@
 #include <iostream>
 #include <string.h>
-
 #include <mpi.h>
+
+#include <math.h>
 
 #include "ForARN.hpp"
 #include "Utils.hpp"
@@ -18,8 +19,14 @@ int main(int argc, char* argv[]) {
 	const int K = atoi(argv[2]);
 	const int NB_SEQ = atoi(argv[3]);
 
+    // get the number of digits in NB_SEQ
+    // maybe there is a simpler way to do it
+    const int uid_len = ((int) floor(log10(NB_SEQ))) + 1;
+
 	int pid, nprocs;
 	int root = 0;
+
+    string colors[4] = {"aquamarine", "goldenrod1", "hotpink1", "chartreuse"};
 
 	// au cas ou on voudrait gerer des séquences dupliquées.
 	int nb_nodes = NB_SEQ;
@@ -161,8 +168,8 @@ int main(int argc, char* argv[]) {
     int* periods = new int[2]{0,0};
 
     // Definitions des dimensions à garder pour la création des communicateurs par Cart_sub
-    int* remain_dims_col = new int[2]{0,1};
-    int* remain_dims_line = new int[2]{1,0};
+    int* remain_dims_col = new int[2]{1,0};
+    int* remain_dims_line = new int[2]{0,1};
 
     MPI_Comm MPI_COMM_CART;
     MPI_Comm MPI_COMM_COL;
@@ -171,18 +178,18 @@ int main(int argc, char* argv[]) {
     
     MPI_Cart_create(MPI_COMM_WORLD, 2, ndims, periods, false, &MPI_COMM_CART);
 
-    MPI_Cart_sub(MPI_COMM_CART, remain_dims_col, &MPI_COMM_COL);
-    MPI_Cart_sub(MPI_COMM_CART, remain_dims_line, &MPI_COMM_LINE);         
+    MPI_Cart_sub(MPI_COMM_CART, remain_dims_col, &MPI_COMM_COL);         
+    MPI_Cart_sub(MPI_COMM_CART, remain_dims_line, &MPI_COMM_LINE);
 
 
     // Libération des divers array utilisés pour la séparation du 
     // communicateur world en grille.
     delete[] ndims;
     delete[] periods;
-    delete[] remain_dims_line;
     delete[] remain_dims_col;
+    delete[] remain_dims_line;
 
-    scatteredFloydAlgorithm(bloc, b, nb_nodes, MPI_COMM_COL, MPI_COMM_LINE);
+    scatteredFloydAlgorithm(bloc, b, nb_nodes, MPI_COMM_LINE, MPI_COMM_COL);
 
     int *mat_gathered, *mat_distances;
 
@@ -296,10 +303,8 @@ int main(int argc, char* argv[]) {
 
         MPI_Reduce(permutation_cost, temp, K, MPI_INT, MPI_SUM, root, MPI_COMM_WORLD);
 
-        memcpy(permutation_cost, temp, K * sizeof(int));
-        
-
         if (pid == root) {
+            memcpy(permutation_cost, temp, K * sizeof(int));
             int best_cost_index = min_elt_index(permutation_cost, K);
             int new_cost = permutation_cost[best_cost_index];
             if (new_cost < global_cost) {
@@ -321,6 +326,49 @@ int main(int argc, char* argv[]) {
 
 	// Export (+ calcul des communautées)
 
+    // NODES
+    // C2N20 [label="C2N20",color="darkorchid"];
+
+    if (pid == root) {
+        ofstream ofile;
+        ofile.open("output/arn.dot");
+        ofile.clear();
+        ofile << "graph output_arn {\nnode [shape=circle, style=filled, color=lightyellow, fontcolor=black];\nedge [color=black, fontcolor=blue];\n" << endl;
+        
+        for (int i = 0; i < nb_nodes; ++i) {
+            // find the closest medoid (ie, community)
+            int closest_medoid_idx = 0;
+            int closest_medoid_dist = mat_distances[i*nb_nodes + medoids[0]];
+            for (int k = 1; k < K; ++k) {
+                if (mat_distances[i*nb_nodes + medoids[k]] < closest_medoid_dist) {
+                    closest_medoid_idx = k;
+                    closest_medoid_dist = mat_distances[i*nb_nodes + medoids[k]];
+                }
+            }
+
+            ofile << i << " [label=\"" << i << "\",color=\"" << colors[closest_medoid_idx] ;
+
+            // if the node is a medoid
+            if (closest_medoid_dist == 0) {
+                // make the node bigger and a pentagon instead of an ellipse
+                ofile << "\",fixedsize=true,width=2,height=2,shape=\"pentagon";
+            }
+
+            ofile << "\"];" << endl; ;
+
+            // find the edges
+            // C2N21 -- C2N13 [label="1", weight=1];
+            for (int j = i; j < nb_nodes; ++j) {
+                const int w = mat_distances[i*nb_nodes + j];
+                if (w <= 70 && w != 0) {
+                    ofile << i << " -- " << j << " [label=\"" << w << "\",weight=" << w << "];" << endl ;
+                }
+            }
+        }
+        ofile << "}" << endl;
+        ofile.close();
+    }
+
     // final cleanup
     delete[] medoids;
     delete[] permutations;
@@ -331,7 +379,6 @@ int main(int argc, char* argv[]) {
     if (pid == root) {
         delete[] mat_gathered;
         delete[] mat_distances;
-        // delete[] reduced_candidates;
 		delete[] sequences;
 	}
 	delete[] sequences_fragment;
