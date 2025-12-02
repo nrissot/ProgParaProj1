@@ -10,15 +10,15 @@ Les fichiers aillant une structure assez simple, le parseur en lui même (conten
 
 La construction de la matrice d'adjacence en revanche est parallélisable:
 
-1. ROOT partages les séquences d'ARN avec un `Scatterv` de sorte que chaque processus dispose de $(\frac{nb\_nodes}{nprocs}) (\pm 1)$ séquences.
-2. Les processus `Bcast` leurs fragment à tout les autres processus.
-3. Les processus utilisent les données reçue pour calculer la distance de hamming entre chaque séquences reçue et chaque séquence dans leurs propre fragment, puis notent le résultat dans leurs matrice.
-4. ROOT `Reduce` avec une somme les matrices (initialisées à 0) de chaque processus.
+1. ROOT partages les séquences d'ARN avec un `Scatterv` de sorte que chaque coeur dispose de $(\frac{nb\_nodes}{nprocs}) (\pm 1)$ séquences.
+2. Les coeurs `Bcast` leurs fragment à tout les autres coeurs.
+3. Les coeur utilisent les données reçue pour calculer la distance de hamming entre chaque séquences reçue et chaque séquence dans leurs propre fragment, puis notent le résultat dans leurs matrice.
+4. ROOT `Reduce` avec une somme les matrices (initialisées à 0) de chaque coeur.
 
 > **Remarque** :
-> Ce processus est techniquement inefficace car la matrice est symétrique, ce qui signifie que chaque séquence est comparé avec chaque autre séquence deux fois. Pour regler cette inneficacité il faudrait pouvoir découper la charge de travail de manière triangulaire.
+> Ce coeur est techniquement inefficace car la matrice est symétrique, ce qui signifie que chaque séquence est comparé avec chaque autre séquence deux fois. Pour regler cette inneficacité il faudrait pouvoir découper la charge de travail de manière triangulaire.
 
 > **Remarque 2** : 
-> Dans un soucis de simplicité d'écriture, chaque processus réserve en mémoire une matrice complète de taille $nb\_nodes \times nb\_nodes$. Cette facilité à été laissée comme amélioration potentielle au moment de l'écriture, et est toujours dans le code aujourd'hui par manque de temps.
+> Dans un soucis de simplicité d'écriture, chaque coeur réserve en mémoire une matrice complète de taille $nb\_nodes \times nb\_nodes$. Cette facilité à été laissée comme amélioration potentielle au moment de l'écriture, et est toujours dans le code aujourd'hui par manque de temps.
 
 Une fois la matrice d'adjacence obtenue, on peut procéder au découpage par blocs de celles-ci pour l'algorithme de Roy-Floyd-Warshall afin d'obtenir la matrice des distances des plus courts chemins comme précedemment, puis au découpage par ligne afin d'utiliser PAM pour obtenir les $k$-médoïdes.
