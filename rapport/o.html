@@ -32,25 +32,76 @@
 <header id="title-block-header">
 <h1 class="title">ProgPara - MPI Projet 1</h1>
 </header>
-<!-- Titre généré par pandoc -->
 <p><em>Joachim Larrouy (M1 ARIAS Recherche), Nathan Rissot (M1 ARIAS GPEx)</em></p>
+<h2 id="roy-floyd-warshall">Roy-Floyd-Warshall</h2>
+<p>L’objectif de l’algorithme de Roy-Floyd-Warshall (parfois simplement appelé Floyd dans la suite de ce rapport) est de construire en temps <span class="math inline">\Theta (|V|^3)</span> <code>mat_distance</code> la matrice des plus courtes distances définie comme</p>
+<p><span class="math display">
+\forall i,j \in V, \mathtt{mat\_distance}[i][j] = \min(\omega (i,*,j))
+</span> (avec <span class="math inline">\omega (i,*,j)</span> le plus court chemin de <span class="math inline">i</span> à <span class="math inline">j</span> dans le graphe) Cet algorithme prend en entrée la matrice d’adjacence <code>mat_adjacence</code> préparée du graphe. On définit <code>mat_adjacence</code> comme</p>
+<p><span class="math display">
+\forall i,j \in V, \mathtt{mat\_adjacence}[i][j] = 
+\begin{cases} 
+    0 \text{ si } i = j \\
+    \omega(i,j) \text{ si } (i,j) \in E \\
+    \infin \text{ sinon} 
+\end{cases} 
+</span></p>
+<p>La version séquentielle de cet algorithme consiste en une triple boucle <span class="math inline">l</span>,<span class="math inline">i</span>,<span class="math inline">j</span> de <span class="math inline">0</span> à <span class="math inline">|V|</span> ou, pour chaque combinaison de <span class="math inline">l</span>,<span class="math inline">i</span>,<span class="math inline">j</span> :</p>
+<p><span class="math display">
+\mathtt{mat\_distance}[i][j] = \min (\mathtt{mat\_distance}[i][j], \mathtt{mat\_distance}[i][l] + \mathtt{mat\_distance}[l][j])
+</span></p>
+<p>La parallélisation de cet algo repose sur le découpage en <span class="math inline">x</span> blocs de taille <span class="math inline">b \times b</span> (avec <span class="math inline">b = \frac{ |V| }{\sqrt{x}}</span>).</p>
+<p>En effet, à chaque itération de la boucle, un bloc n’a besoin que d’une ligne de données reçue de sa colonne de blocs, et d’une colonne de donnée reçue de sa ligne de blocs. En partageant donc les blocs entre <span class="math inline">x</span> coeurs, et en les faisant partager les lignes et colonnes de donnée utiles, on peut effectuer les opérations de comparaisons en simultané, ce qui accélere l’exécution.</p>
+<h2 id="pam">PAM</h2>
+<h3 id="presentation-général.">Presentation général.</h3>
+<p>L’algorithme PAM est un algorithme ayant pour but de déterminer dans notre ensemble de noeud (noté <span class="math inline">V</span>) un sous ensemble <span class="math inline">K</span> (que l’on va nommer ensemble de medoïdes) telle que le cout de notre sous ensemble <span class="math inline">K</span> soit le plus petit possible. Le cout d’un sous ensemble est définit de la manière suivante :</p>
+<p><span class="math display">
+cout = \sum_{n = 0}^{nb\_nodes} \min (\omega(node_n,k_{i}))
+</span></p>
+<ul>
+<li>avec <span class="math inline">k_i</span> un noeud appartenant au sous ensemble <span class="math inline">K</span>.</li>
+<li><span class="math inline">node_n</span> le <span class="math inline">n</span>-ième noeud.</li>
+<li><span class="math inline">\omega(n_1,n_2)</span> la distance entre deux noeuds au seins de notre matrice des distances.</li>
+</ul>
+<p>Pour ce faire, l’algorithme choisit effectue les opération suivantes.</p>
+<ul>
+<li>initialiser notre ensemble de medoïde avec un tirage de noeud aléatoire.</li>
+<li>Pour chaque noeud <span class="math inline">n</span> appartenent à <span class="math inline">( \{V \\ K\} )</span> On calcule le cout du remplacement de chaque medoïde par <span class="math inline">n</span>. Si le cout le plus faible entre toutes nos substitution <span class="math inline">(swap(n,k_i) = Cout_{min} )</span> est plus faible que le cout de l’ensemble <span class="math inline">K</span> à l’iteration courante, alors on substitue <span class="math inline">k_i</span> par <span class="math inline">n</span>.</li>
+</ul>
+<p>Une fois tout les noeuds evalué, on considère avoir un sous ensemble <span class="math inline">K</span> représentant une solution satisfaisante à notre recherche de cout minimum.</p>
+<h3 id="notre-heuristique">Notre heuristique</h3>
+<p>Le cout de l’algorithme glouton effectuant le calcul des meilleurs médoïdes jusqu’a stabilisation ayant un cout <span class="math inline">O(n^2*k^2)</span> nous avons choisit d’appliquer une initialisation avec l’heuristique suivant.</p>
+<p>Lors de l’initialisation, plutot que de partir de noeud aléatoire, une approche pourrait être de découper en ligne notre matrice des distances, et de déterminer pour chaque fragment un ensemble de noeud qui minimise le cout local a ce fragment.</p>
+<p>Puis on choisit comme noeud de départ pour les médoïdes, les noeuds ayant était choisis le plus de fois parmis comme faisant partis des noeuds minimisant les couts locaux.</p>
+<p>Comme le calcul du cout favorise les noeuds présent au sein du fragment et que chaque fragment à une probabilité <span class="math inline">\frac{1}{nb\_fragment}</span> de posséder un médoïde <span class="math inline">k_i</span>. Il convient de retirer du choix possible les noeuds présent dans notre fragment.</p>
+<figure>
+<img src="./asset/image_ensemble.png" alt="" /><figcaption>fig x. Représentation du graphe global</figcaption>
+</figure>
+<figure>
+<img src="./asset/image_local.png" alt="" /><figcaption>fig x. Représentation du fragment local</figcaption>
+</figure>
+<p>Le cout étant de l’ordre de <span class="math inline">n^2</span>, fragmenter suffisament la matrice permet de faire un précalcul relativement rapide.</p>
+<blockquote>
+<p><strong>Remarque</strong> : Dans le cas ou la taille des données reste trop grande pour effectuer ce prétraitement, il est aussi possible de n’effectuer celui-ci que sur un échaintillon de notre donnée.</p>
+</blockquote>
 <h2 id="application-à-des-données-de-séquences-darn">Application à des données de séquences d’ARN</h2>
-<p>Pour l’applications des algorithmes à un nouveau type de donnée, la seule adaptation que nous avons du faire à été de programmer un parseur, et de mettre en place la génération de la matrice d’adjacence.</p>
+<p>Pour l’applications des algorithmes à ce nouveau type de donnée, la seule adaptation que nous avons du faire à été de programmer un nouveau parseur pour extraire les données des fichiers sources, et de mettre en place la génération de la matrice d’adjacence sur ces données.</p>
 <h3 id="parsing-du-fichier">Parsing du fichier</h3>
 <p>Les fichiers aillant une structure assez simple, le parseur en lui même (contenu dans <code>readArnFromFile</code>) consiste simplement à placer et à aligner les chaines de caractères extraite du fichier dans une matrice de taille <span class="math inline">nb\_nodes \times ||séquence\ arn||</span>. Cette opération n’est pas parallélisable, toutes les données etant stockés dans le même fichier.</p>
 <h3 id="construction-de-la-matrice-dadjacence">Construction de la matrice d’adjacence</h3>
 <p>La construction de la matrice d’adjacence en revanche est parallélisable:</p>
 <ol type="1">
-<li>ROOT partages les séquences d’ARN avec un <code>Scatterv</code> de sorte que chaque processus dispose de <span class="math inline">(\frac{nb\_nodes}{nprocs}) (\pm 1)</span> séquences.</li>
-<li>Les processus <code>Bcast</code> leurs fragment à tout les autres processus.</li>
-<li>Les processus utilisent les données reçue pour calculer la distance de hamming entre chaque séquences reçue et chaque séquence dans leurs propre fragment, puis notent le résultat dans leurs matrice.</li>
-<li>ROOT <code>Reduce</code> avec une somme les matrices (initialisées à 0) de chaque processus.</li>
+<li>ROOT partages les séquences d’ARN avec un <code>Scatterv</code> de sorte que chaque coeur dispose de <span class="math inline">(\frac{nb\_nodes}{nprocs}) (\pm 1)</span> séquences.</li>
+<li>Les coeurs <code>Bcast</code> leurs fragment à tout les autres coeurs.</li>
+<li>Les coeur utilisent les données reçue pour calculer la distance de hamming entre chaque séquences reçue et chaque séquence dans leurs propre fragment, puis notent le résultat dans leurs matrice.</li>
+<li>ROOT <code>Reduce</code> avec une somme les matrices (initialisées à 0) de chaque coeur.</li>
 </ol>
 <blockquote>
-<p><strong>Remarque</strong> : Ce processus est techniquement inefficace car la matrice est symétrique, ce qui signifie que chaque séquence est comparé avec chaque autre séquence deux fois. Pour regler cette inneficacité il faudrait pouvoir découper la charge de travail de manière triangulaire.</p>
+<p><strong>Remarque</strong> : Ce coeur est techniquement inefficace car la matrice est symétrique, ce qui signifie que chaque séquence est comparé avec chaque autre séquence deux fois. Pour regler cette inneficacité il faudrait pouvoir découper la charge de travail de manière triangulaire.</p>
 </blockquote>
 <blockquote>
-<p><strong>Remarque 2</strong> : Dans un soucis de simplicité d’écriture, chaque processus réserve en mémoire une matrice complète de taille <span class="math inline">nb\_nodes \times nb\_nodes</span>. Cette facilité à été laissée comme amélioration potentielle au moment de l’écriture, et est toujours dans le code aujourd’hui par manque de temps.</p>
+<p><strong>Remarque 2</strong> : Dans un soucis de simplicité d’écriture, chaque coeur réserve en mémoire une matrice complète de taille <span class="math inline">nb\_nodes \times nb\_nodes</span>. Cette facilité à été laissée comme amélioration potentielle au moment de l’écriture, et est toujours dans le code aujourd’hui par manque de temps.</p>
 </blockquote>
+<p>Une fois la matrice d’adjacence obtenue, on peut procéder au découpage par blocs de celles-ci pour l’algorithme de Roy-Floyd-Warshall afin d’obtenir la matrice des distances des plus courts chemins comme précedemment, puis au découpage par ligne afin d’utiliser PAM pour obtenir les <span class="math inline">k</span>-médoïdes.</p>
 </body>
 </html>

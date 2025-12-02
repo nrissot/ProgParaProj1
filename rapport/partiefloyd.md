@@ -16,5 +16,13 @@ $$
 \end{cases} 
 $$
 
-La parallélisation de cet algo repose sur le découpage en $x$ blocs de taille $b \times b$ (avec $b = \frac{ |V| }{\sqrt{x}}$) et l'application de l'algorithme en paralléle sur chacun de ces blocs. En effet, seules les valeurs provenant d'une seule des lignes et d'une seule des colonnes de la matrice des blocs n'est nécessaire pour qu'un bloc calcule les nouveaux plus courts chemins à une itération $k$ donnée.
+La version séquentielle de cet algorithme consiste en une triple boucle $l$,$i$,$j$ de $0$ à $|V|$ ou, pour chaque combinaison de $l$,$i$,$j$ :
+
+$$
+\mathtt{mat\_distance}[i][j] = \min (\mathtt{mat\_distance}[i][j], \mathtt{mat\_distance}[i][l] + \mathtt{mat\_distance}[l][j])
+$$
+
+La parallélisation de cet algo repose sur le découpage en $x$ blocs de taille $b \times b$ (avec $b = \frac{ |V| }{\sqrt{x}}$).
+
+En effet, à chaque itération de la boucle, un bloc n'a besoin que d'une ligne de données reçue de sa colonne de blocs, et d'une colonne de donnée reçue de sa ligne de blocs. En partageant donc les blocs entre $x$ coeurs, et en les faisant partager les lignes et colonnes de donnée utiles, on peut effectuer les opérations de comparaisons en simultané, ce qui accélere l'exécution.
 
