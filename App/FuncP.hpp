@@ -37,10 +37,10 @@ int* repareAfterGather(int nb_nodes, int* gathered_mat); //DEBUG:x
  * @param bloc le fragment de la matrice d'adjacence correspondant au bloc (de taille b × b)
  * @param b la taille du bloc
  * @param nb_nodes le nombre total de noeuds du graphe
- * @param MPI_COMM_COL le communicateur en colonne
  * @param MPI_COMM_LINE le communicateur en ligne
+ * @param MPI_COMM_COL le communicateur en colonne
  */
-void scatteredFloydAlgorithm(int* bloc, int b, int nb_nodes, MPI_Comm MPI_COMM_COL, MPI_Comm MPI_COMM_LINE); //DEBUG:x
+void scatteredFloydAlgorithm(int* bloc, int b, int nb_nodes, MPI_Comm MPI_COMM_LINE, MPI_Comm MPI_COMM_COL); //DEBUG:x
 
 
 /**

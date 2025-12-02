@@ -16,4 +16,5 @@ $$
 \end{cases} 
 $$
 
-La parallélisation de cet algo repose sur le découpage en $x$ blocs de taille $b \times b$ (avec $b = \frac{ |V| }{\sqrt{x}}$) et l'application de l'algorithme en paralléle sur chacun de ces blocs. En effet, seules les valeurs provenant d'une ligne et d'une colonne de la matrice des blocs
+La parallélisation de cet algo repose sur le découpage en $x$ blocs de taille $b \times b$ (avec $b = \frac{ |V| }{\sqrt{x}}$) et l'application de l'algorithme en paralléle sur chacun de ces blocs. En effet, seules les valeurs provenant d'une seule des lignes et d'une seule des colonnes de la matrice des blocs n'est nécessaire pour qu'un bloc calcule les nouveaux plus courts chemins à une itération $k$ donnée.
+

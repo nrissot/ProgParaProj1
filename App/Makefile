@@ -25,7 +25,7 @@ main_arn: main_arn.o ForARN.o FuncP.o Utils.o
 	$(CXX) -o $@ $^ $(CXXFLAGS)
 
 run:
-	mpirun -np 16 --oversubscribe ./main "exemples/exported_graph.dot" 4
+	mpirun -np 4 --oversubscribe ./main "exemples/PetitExemple.dot" 4
 
 run_arn_2000:
 	mpirun -np 16 --oversubscribe ./main_arn "exemples/arn/dataset_2000seq.fa" 4 2000

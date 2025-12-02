@@ -132,43 +132,43 @@ int *repareAfterGather(int nb_nodes, int *gathered_mat) {
     return resultat;
 }
 
-void scatteredFloydAlgorithm(int* bloc, int b, int nb_nodes, MPI_Comm MPI_COMM_COL, MPI_Comm MPI_COMM_LINE) {
-    int col_pid, line_pid, pid;
+void scatteredFloydAlgorithm(int* bloc, int b, int nb_nodes, MPI_Comm MPI_COMM_LINE, MPI_Comm MPI_COMM_COL) {
+    int line_pid, col_pid, pid;
     MPI_Comm_rank(MPI_COMM_WORLD, &pid);
-    MPI_Comm_rank(MPI_COMM_COL, &col_pid);
     MPI_Comm_rank(MPI_COMM_LINE, &line_pid);
+    MPI_Comm_rank(MPI_COMM_COL, &col_pid);
 
-    int* recv_from_COMM_COL = new int[b];   // taille (b*1)
-    int* recv_from_COMM_LINE = new int[b];  // taille (1*b)
+    int* recv_from_COMM_COL = new int[b];   // taille (b*1) => ligne
+    int* recv_from_COMM_LINE = new int[b];  // taille (1*b) => colonne
 
     for (int l=0; l < nb_nodes; ++l) {
         int position_pid_dans_COMM = l / b;
         int position_dans_bloc = l % b;
 
-        if (col_pid == position_pid_dans_COMM) {
+        if (line_pid == position_pid_dans_COMM) {
             // on copie les element de la ligne n° position du bloc dans recv from COL
             for (int i = 0; i < b; ++i) {
-                recv_from_COMM_COL[i] = bloc[i*b + position_dans_bloc];
+                recv_from_COMM_LINE[i] = bloc[i*b + position_dans_bloc];
             }
         }
-        if (line_pid == position_pid_dans_COMM) {
+        if (col_pid == position_pid_dans_COMM) {
             // on copie les element de la colonne n° position du bloc dans recv from LINE
             for (int i = 0; i < b; ++i) {
-                recv_from_COMM_LINE[i] = bloc[position_dans_bloc*b + i];
+                recv_from_COMM_COL[i] = bloc[position_dans_bloc*b + i];
             }
         }
-        MPI_Bcast(recv_from_COMM_COL, b, MPI_INT, position_pid_dans_COMM, MPI_COMM_COL);
         MPI_Bcast(recv_from_COMM_LINE, b, MPI_INT, position_pid_dans_COMM, MPI_COMM_LINE);
+        MPI_Bcast(recv_from_COMM_COL, b, MPI_INT, position_pid_dans_COMM, MPI_COMM_COL);
 
         for (int i = 0; i < b; ++i) {
             for (int j = 0; j < b; ++j) {
-                bloc[i*b +j] = min(bloc[i*b +j], recv_from_COMM_LINE[j]+recv_from_COMM_COL[i]);
+                bloc[i*b +j] = min(bloc[i*b +j], recv_from_COMM_COL[j]+recv_from_COMM_LINE[i]);
             }
         }
 
     }
-    delete[] recv_from_COMM_COL;
     delete[] recv_from_COMM_LINE;
+    delete[] recv_from_COMM_COL;
 }
 
 int *findLocalMedoidCandidate(int *mat_distance_fragment, int k, int nb_nodes, int nb_lignes_fragment) {
