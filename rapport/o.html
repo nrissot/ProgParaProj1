@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>rapport</title>
+  <title>ProgPara - MPI Projet 1</title>
   <style>
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
@@ -29,14 +29,23 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css" />
 </head>
 <body>
-<h1 id="progpara---mpi-projet-1">ProgPara - MPI Projet 1</h1>
+<header id="title-block-header">
+<h1 class="title">ProgPara - MPI Projet 1</h1>
+</header>
+<!-- Titre généré par pandoc -->
 <p><em>Joachim Larrouy (M1 ARIAS Recherche), Nathan Rissot (M1 ARIAS GPEx)</em></p>
 <h2 id="application-à-des-données-de-séquences-darn">Application à des données de séquences d’ARN</h2>
 <p>Pour l’applications des algorithmes à un nouveau type de donnée, la seule adaptation que nous avons du faire à été de programmer un parseur, et de mettre en place la génération de la matrice d’adjacence.</p>
 <h3 id="parsing-du-fichier">Parsing du fichier</h3>
 <p>Les fichiers aillant une structure assez simple, le parseur en lui même (contenu dans <code>readArnFromFile</code>) consiste simplement à placer et à aligner les chaines de caractères extraite du fichier dans une matrice de taille <span class="math inline">nb\_nodes \times ||séquence\ arn||</span>. Cette opération n’est pas parallélisable, toutes les données etant stockés dans le même fichier.</p>
 <h3 id="construction-de-la-matrice-dadjacence">Construction de la matrice d’adjacence</h3>
-<p>La construction de la matrice d’adjacence en revanche est parallélisable. 1. ROOT partages les séquences d’ARN avec un <code>Scatterv</code> de sorte que chaque processus dispose de <span class="math inline">(\frac{nb\_nodes}{nprocs}) (\pm 1)</span> séquences. 2. Les processus <code>Bcast</code> leurs fragment à tout les autres processus. 3. Les processus utilisent les données reçue pour calculer la distance de hamming entre chaque séquences reçue et chaque séquence dans leurs propre fragment, puis notent le résultat dans leurs matrice. 4. ROOT <code>Reduce</code> avec une somme les matrices (initialisées à 0) de chaque processus.</p>
+<p>La construction de la matrice d’adjacence en revanche est parallélisable:</p>
+<ol type="1">
+<li>ROOT partages les séquences d’ARN avec un <code>Scatterv</code> de sorte que chaque processus dispose de <span class="math inline">(\frac{nb\_nodes}{nprocs}) (\pm 1)</span> séquences.</li>
+<li>Les processus <code>Bcast</code> leurs fragment à tout les autres processus.</li>
+<li>Les processus utilisent les données reçue pour calculer la distance de hamming entre chaque séquences reçue et chaque séquence dans leurs propre fragment, puis notent le résultat dans leurs matrice.</li>
+<li>ROOT <code>Reduce</code> avec une somme les matrices (initialisées à 0) de chaque processus.</li>
+</ol>
 <blockquote>
 <p><strong>Remarque</strong> : Ce processus est techniquement inefficace car la matrice est symétrique, ce qui signifie que chaque séquence est comparé avec chaque autre séquence deux fois. Pour regler cette inneficacité il faudrait pouvoir découper la charge de travail de manière triangulaire.</p>
 </blockquote>
