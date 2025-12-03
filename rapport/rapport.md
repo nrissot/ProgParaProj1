@@ -132,8 +132,6 @@ Cepandant on remarque que pour PAM, le temps de calcul augmente légerement entr
 
 Comme on peut le voir sur le graphe des courbes cumulés, ce changement implique qu'une plus grande part du temps d'execution total est dédié a cette étape, mais on peut aussi constater que les résultats obtenus par les executions de l'algorithme avec le pré-traitement heuristique sont bien meilleurs
 
-![*fig 7. Comparaison des temps d'exécutions, et de la quelité des résultats de PAM avec et sans l'heuristique*](asset/TODO.svg)
-
 > **Calcul de l'accelération** : 
 > $$\text{speedup} = \frac{T_{seq}}{T_{nprocs}} \times 100$$
 
