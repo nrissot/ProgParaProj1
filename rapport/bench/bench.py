@@ -1,10 +1,13 @@
 from pathlib import Path
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 import numpy as np
 
 INPUT_TXT : Path = Path("bench.txt")
 VAL_NAMES : list[str] = ["temps total", "temps init", "temps lecture", "temps matrice", "temps floyd", "temps pam"]
 lines : list[str] = [ ]
+
+colors_curve = (("black", "royalblue"), ("darkorange", "forestgreen")) 
 
 mean_times : list[tuple[str, list[float]]] = [ ]
 
@@ -60,7 +63,7 @@ fig.set_size_inches(18, 10)
 for t in range(len(TARGET_CHRONOS)):
     i = VAL_NAMES.index(TARGET_CHRONOS[t])
     ax = axis[t//2][t%2]
-    ax.plot(x, ys2k[i], "b-o")
+    ax.plot(x, ys2k[i], "-o", color=colors_curve[t//2][t%2])
     for j in range(len(x)):
         xval = x[j]
         yval = ys2k[i][j]
@@ -88,7 +91,7 @@ fig.set_size_inches(18, 10)
 for t in range(len(TARGET_CHRONOS)):
     i = VAL_NAMES.index(TARGET_CHRONOS[t])
     ax = axis[t//2][t%2]
-    ax.plot(x, ys500[i], "b-o")
+    ax.plot(x, ys500[i], "-o", color=colors_curve[t//2][t%2])
     for j in range(len(x)):
         xval = x[j]
         yval = ys500[i][j]
@@ -139,3 +142,23 @@ ax.legend()
 ax.set(xticks=x, xlabel="# de coeurs",  ylabel="temps cumulé (ms)")
 
 fig.savefig("../asset/temps_cumulés_500.svg")
+
+# speedup (2000)
+
+plt.clf()
+
+fig, axis = plt.subplots(2, 2, sharey=True)
+fig.set_size_inches(18, 10)
+
+for t in range(len(TARGET_CHRONOS)):
+    i = VAL_NAMES.index(TARGET_CHRONOS[t])
+    ax = axis[t//2][t%2]
+    y = [1*100, ys2k[i][0]/ys2k[i][1]*100, ys2k[i][0]/ys2k[i][2]*100]
+    for j in range(3):
+        ax.text(x[j], y[j]+((15) if (TARGET_CHRONOS[t] == "temps pam") else (-30)), f"{round(y[j])}%", horizontalalignment=("left" if j != 2 else "right"))
+    ax.plot(x, y, "-o", color=colors_curve[t//2][t%2])
+    ax.set_title(f"[{TARGET_CHRONOS[t].split(" ")[1].upper()}]")
+    ax.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=100)) 
+    ax.set(xlabel="# de coeurs", ylabel="accélération", xticks=x)
+
+plt.savefig(f"../asset/acceleration_2k.svg")

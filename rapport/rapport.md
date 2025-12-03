@@ -33,7 +33,7 @@ La parallélisation de cet algo repose sur le découpage en $x$ blocs de taille 
 
 En effet, à chaque itération de la boucle, un bloc n'a besoin que d'une ligne de données reçue de sa colonne de blocs, et d'une colonne de donnée reçue de sa ligne de blocs. En partageant donc les blocs entre $x$ coeurs, et en les faisant partager les lignes et colonnes de donnée utiles, on peut effectuer les opérations de comparaisons en simultané, ce qui accélere l'exécution.
 
-![fig 1. Exemple de partage de la matrice par bloc](./asset/bloc_share_floyd_schéma_tableau.jpg)
+![*fig 1. Exemple de partage de la matrice par bloc*](./asset/bloc_share_floyd_schéma_tableau.jpg)
 
 ## PAM
 
@@ -42,7 +42,7 @@ En effet, à chaque itération de la boucle, un bloc n'a besoin que d'une ligne 
 L'algorithme PAM est un algorithme ayant pour but de déterminer dans notre ensemble de noeud (noté $V$) un sous ensemble $K$ (que l'on va nommer ensemble de medoïdes) telle que le cout de notre sous ensemble $K$ soit le plus petit possible. Le cout d'un sous ensemble est définit de la manière suivante :
 
 $$
-cout = \sum_{n = 0}^{nb\_nodes} \min (\omega(node_n,k_{i}))
+\text{cout} = \sum_{n = 0}^{nb\_nodes} \min (\omega(node_n,k_{i}))
 $$
 
 - avec $k_i$ un noeud appartenant au sous ensemble $K$.
@@ -52,7 +52,7 @@ $$
 Pour ce faire, l'algorithme choisit effectue les opération suivantes.
 
 - initialiser notre ensemble de medoïde avec un tirage de noeud aléatoire.
-- Pour chaque noeud $n$ appartenent à $( \{V \\ K\} )$ On calcule le cout du remplacement de chaque medoïde par $n$. Si le cout le plus faible entre toutes nos substitution $(swap(n,k_i) = Cout_{min} )$ est plus faible que le cout de l'ensemble $K$ à l'iteration courante, alors on substitue $k_i$ par $n$.
+- Pour chaque noeud $n$ appartenent à $( \{V \\ K\} )$ On calcule le cout du remplacement de chaque medoïde par $n$. Si le cout le plus faible entre toutes nos substitution $(\text{swap}(n,k_i) = \text{cout}_{\min} )$ est plus faible que le cout de l'ensemble $K$ à l'iteration courante, alors on substitue $k_i$ par $n$.
 
 Une fois tout les noeuds evalué, on considère avoir un sous ensemble $K$ représentant une solution satisfaisante à notre recherche de cout minimum.
 
@@ -65,7 +65,7 @@ Puis on choisit comme noeud de départ pour les médoïdes, les noeuds ayant ét
 
 Comme le calcul du cout favorise les noeuds présent au sein du fragment et que chaque fragment à une probabilité $\frac{1}{nb\_fragment}$ de posséder un médoïde $k_i$. Il convient de retirer du choix possible les noeuds présent dans notre fragment.
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em;"><figure><img src="./asset/image_ensemble.png" alt="fig 2. Représentation du graphe "/><figcaption aria-hidden="true">fig 2. Représentation du graphe global</figcaption></figure><figure><img src="./asset/image_local.png" alt="fig 3. Représentation du fragment "/><figcaption aria-hidden="true">fig 3. Représentation du fragment local</figcaption></figure></div>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em;"><figure><img src="./asset/image_ensemble.png" alt="fig 2. Représentation du graphe "/><figcaption aria-hidden="true"><i>fig 2. Représentation du graphe global</i></figcaption></figure><figure><img src="./asset/image_local.png" alt="fig 3. Représentation du fragment "/><figcaption aria-hidden="true"><i>fig 3. Représentation du fragment local</i></figcaption></figure></div>
 
 Le cout étant de l'ordre de $n^2$, fragmenter suffisament la matrice permet de faire un précalcul relativement rapide.
 
@@ -84,7 +84,7 @@ Les fichiers aillant une structure assez simple, le parseur en lui même (conten
 
 La construction de la matrice d'adjacence en revanche est parallélisable:
 
-1. ROOT partages les séquences d'ARN avec un `Scatterv` de sorte que chaque coeur dispose de $(\frac{nb\_nodes}{nprocs}) (\pm 1)$ séquences.
+1. ROOT partages les séquences d'ARN avec un `Scatterv` de sorte que chaque coeur dispose de $\left(\frac{nb\_nodes}{nprocs}\right) (\pm 1)$ séquences.
 2. Les coeurs `Bcast` leurs fragment à tout les autres coeurs.
 3. Les coeur utilisent les données reçue pour calculer la distance de hamming entre chaque séquences reçue et chaque séquence dans leurs propre fragment, puis notent le résultat dans leurs matrice.
 4. ROOT `Reduce` avec une somme les matrices (initialisées à 0) de chaque coeur.
@@ -97,7 +97,7 @@ La construction de la matrice d'adjacence en revanche est parallélisable:
 
 Une fois la matrice d'adjacence obtenue, on peut procéder au découpage par blocs de celles-ci pour l'algorithme de Roy-Floyd-Warshall afin d'obtenir la matrice des distances des plus courts chemins comme précedemment, puis au découpage par ligne afin d'utiliser PAM pour obtenir les $k$-médoïdes.
 
-## Benchmarks
+## Benchmarks & Analyses
 
 > **Remarque** :
 > Nous n'avons effectué des Bench que sur les séquences d'ARN car les temps de calculs sur les exemples de graphes donnés etait trop court, et les différences de temps venaient plus de facteurs extérieurs (temps d'initialisation de MPI, opération OS) que du code lui même.
@@ -106,18 +106,21 @@ Les bench ont été effectués sur des TODO:TYPEOFMACHINE diposant de 6 coeurs p
 
 De plus, nous n'avons pas lancé de test avec 9 coeurs, car les tailles des fichiers de séquences d'ARN (500 et 2k) ne sont pas divisible par $\sqrt{9} (=3)$ et donc ne respectent pas les hypothèses favorables dont dépend notre implémentation de l'algorithmes de Roy-Floyd-Warshall
 
-![fig 4. Performances moyennes (en ms) des étapes de génération de la matrice, de l'executions de l'algorithmes de Roy-Floyd-Warshall, de PAM et du total pour 500 noeuds selon le nombre de coeurs](asset/500_nodes.svg)
+![*fig 4. Performances moyennes (en ms) des étapes de génération de la matrice, de l'executions de l'algorithmes de Roy-Floyd-Warshall, de PAM et du total pour 500 noeuds selon le nombre de coeurs*](asset/500_nodes.svg)
 
-![fig 5. Performances moyennes (en ms) des étapes de génération de la matrice, de l'executions de l'algorithmes de Roy-Floyd-Warshall, de PAM et du total pour 2K noeuds selon le nombre de coeurs](asset/2K_nodes.svg)
+![*fig 5. Performances moyennes (en ms) des étapes de génération de la matrice, de l'executions de l'algorithmes de Roy-Floyd-Warshall, de PAM et du total pour 2K noeuds selon le nombre de coeurs*](asset/2K_nodes.svg)
 
 Sur ces graphes des temps d'execution moyens, on remarque que pour presque toutes les étapes, le temps de calcul diminue au fur et à mesure que l'on augmente le nomnbre de processus (CF, fig 8. les courbes d'accélérations). 
 
 Cepandant on remarque que pour PAM, le temps de calcul augmente légerement entre la version séquentielle et la version parallélisée. Cela est dù au fait que l'implémentation du premier calcul qui nous permet d'avoir une initialisation fiable des premiers candidats ne fonctionne pas avec un seul processeur, et à donc été remplacé par un simple choix aléatoire.
 
-![fig 6. Courbe des temps d'execution cumulés, et pourcentage du temps total pour 500 noeuds selon le nombre de coeurs ](asset/temps_cumulés_500.svg)
+![*fig 6. Courbe des temps d'execution cumulés, et pourcentage du temps total pour 500 noeuds selon le nombre de coeurs*](asset/temps_cumulés_500.svg)
 
 Comme on peut le voir sur le graphe des courbes cumulés, ce changement implique qu'une plus grande part du temps d'execution total est dédié a cette étape, mais on peut aussi constater que les résultats obtenus par les executions de l'algorithme avec le pré-traitement heuristique sont bien meilleurs
 
-![fig 7. Comparaison des temps d'exécutions, et de la quelité des résultats de PAM avec et sans l'heuristique](asset/TODO.svg)
+![*fig 7. Comparaison des temps d'exécutions, et de la quelité des résultats de PAM avec et sans l'heuristique*](asset/TODO.svg)
 
-![fig 8. Courbe d'accélération de l'execution du programme](asset/TODO.svg)
+![*fig 8. Courbe d'accélération de l'execution du programme*](asset/acceleration_2k.svg)
+
+> **Calcul de l'accelération** : 
+> $$\text{speedup} = \frac{T_{seq}}{T_{nprocs}} \times 100$$

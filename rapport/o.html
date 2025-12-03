@@ -100,8 +100,8 @@ l’exécution.</p>
 <figure>
 <img src="./asset/bloc_share_floyd_schéma_tableau.jpg"
 alt="fig 1. Exemple de partage de la matrice par bloc" />
-<figcaption aria-hidden="true">fig 1. Exemple de partage de la matrice
-par bloc</figcaption>
+<figcaption aria-hidden="true"><em>fig 1. Exemple de partage de la
+matrice par bloc</em></figcaption>
 </figure>
 <h2 id="pam">PAM</h2>
 <h3 id="presentation-général.">Presentation général.</h3>
@@ -112,7 +112,7 @@ ensemble de medoïdes) telle que le cout de notre sous ensemble <span
 class="math inline">K</span> soit le plus petit possible. Le cout d’un
 sous ensemble est définit de la manière suivante :</p>
 <p><span class="math display">
-cout = \sum_{n = 0}^{nb\_nodes} \min (\omega(node_n,k_{i}))
+\text{cout} = \sum_{n = 0}^{nb\_nodes} \min (\omega(node_n,k_{i}))
 </span></p>
 <ul>
 <li>avec <span class="math inline">k_i</span> un noeud appartenant au
@@ -131,10 +131,10 @@ aléatoire.</li>
 <span class="math inline">( \{V \\ K\} )</span> On calcule le cout du
 remplacement de chaque medoïde par <span class="math inline">n</span>.
 Si le cout le plus faible entre toutes nos substitution <span
-class="math inline">(swap(n,k_i) = Cout_{min} )</span> est plus faible
-que le cout de l’ensemble <span class="math inline">K</span> à
-l’iteration courante, alors on substitue <span
-class="math inline">k_i</span> par <span
+class="math inline">(\text{swap}(n,k_i) = \text{cout}_{\min} )</span>
+est plus faible que le cout de l’ensemble <span
+class="math inline">K</span> à l’iteration courante, alors on substitue
+<span class="math inline">k_i</span> par <span
 class="math inline">n</span>.</li>
 </ul>
 <p>Une fois tout les noeuds evalué, on considère avoir un sous ensemble
@@ -161,13 +161,13 @@ possible les noeuds présent dans notre fragment.</p>
 <figure>
 <img src="./asset/image_ensemble.png" alt="fig 2. Représentation du graphe "/>
 <figcaption aria-hidden="true">
-fig 2. Représentation du graphe global
+<i>fig 2. Représentation du graphe global</i>
 </figcaption>
 </figure>
 <figure>
 <img src="./asset/image_local.png" alt="fig 3. Représentation du fragment "/>
 <figcaption aria-hidden="true">
-fig 3. Représentation du fragment local
+<i>fig 3. Représentation du fragment local</i>
 </figcaption>
 </figure>
 </div>
@@ -199,7 +199,7 @@ parallélisable:</p>
 <ol type="1">
 <li>ROOT partages les séquences d’ARN avec un <code>Scatterv</code> de
 sorte que chaque coeur dispose de <span
-class="math inline">(\frac{nb\_nodes}{nprocs}) (\pm 1)</span>
+class="math inline">\left(\frac{nb\_nodes}{nprocs}\right) (\pm 1)</span>
 séquences.</li>
 <li>Les coeurs <code>Bcast</code> leurs fragment à tout les autres
 coeurs.</li>
@@ -228,7 +228,7 @@ découpage par blocs de celles-ci pour l’algorithme de Roy-Floyd-Warshall
 afin d’obtenir la matrice des distances des plus courts chemins comme
 précedemment, puis au découpage par ligne afin d’utiliser PAM pour
 obtenir les <span class="math inline">k</span>-médoïdes.</p>
-<h2 id="benchmarks">Benchmarks</h2>
+<h2 id="benchmarks-analyses">Benchmarks &amp; Analyses</h2>
 <blockquote>
 <p><strong>Remarque</strong> : Nous n’avons effectué des Bench que sur
 les séquences d’ARN car les temps de calculs sur les exemples de graphes
@@ -247,18 +247,18 @@ implémentation de l’algorithmes de Roy-Floyd-Warshall</p>
 <figure>
 <img src="asset/500_nodes.svg"
 alt="fig 4. Performances moyennes (en ms) des étapes de génération de la matrice, de l’executions de l’algorithmes de Roy-Floyd-Warshall, de PAM et du total pour 500 noeuds selon le nombre de coeurs" />
-<figcaption aria-hidden="true">fig 4. Performances moyennes (en ms) des
-étapes de génération de la matrice, de l’executions de l’algorithmes de
-Roy-Floyd-Warshall, de PAM et du total pour 500 noeuds selon le nombre
-de coeurs</figcaption>
+<figcaption aria-hidden="true"><em>fig 4. Performances moyennes (en ms)
+des étapes de génération de la matrice, de l’executions de l’algorithmes
+de Roy-Floyd-Warshall, de PAM et du total pour 500 noeuds selon le
+nombre de coeurs</em></figcaption>
 </figure>
 <figure>
 <img src="asset/2K_nodes.svg"
 alt="fig 5. Performances moyennes (en ms) des étapes de génération de la matrice, de l’executions de l’algorithmes de Roy-Floyd-Warshall, de PAM et du total pour 2K noeuds selon le nombre de coeurs" />
-<figcaption aria-hidden="true">fig 5. Performances moyennes (en ms) des
-étapes de génération de la matrice, de l’executions de l’algorithmes de
-Roy-Floyd-Warshall, de PAM et du total pour 2K noeuds selon le nombre de
-coeurs</figcaption>
+<figcaption aria-hidden="true"><em>fig 5. Performances moyennes (en ms)
+des étapes de génération de la matrice, de l’executions de l’algorithmes
+de Roy-Floyd-Warshall, de PAM et du total pour 2K noeuds selon le nombre
+de coeurs</em></figcaption>
 </figure>
 <p>Sur ces graphes des temps d’execution moyens, on remarque que pour
 presque toutes les étapes, le temps de calcul diminue au fur et à mesure
@@ -273,9 +273,9 @@ simple choix aléatoire.</p>
 <figure>
 <img src="asset/temps_cumulés_500.svg"
 alt="fig 6. Courbe des temps d’execution cumulés, et pourcentage du temps total pour 500 noeuds selon le nombre de coeurs" />
-<figcaption aria-hidden="true">fig 6. Courbe des temps d’execution
+<figcaption aria-hidden="true"><em>fig 6. Courbe des temps d’execution
 cumulés, et pourcentage du temps total pour 500 noeuds selon le nombre
-de coeurs</figcaption>
+de coeurs</em></figcaption>
 </figure>
 <p>Comme on peut le voir sur le graphe des courbes cumulés, ce
 changement implique qu’une plus grande part du temps d’execution total
@@ -285,15 +285,20 @@ heuristique sont bien meilleurs</p>
 <figure>
 <img src="asset/TODO.svg"
 alt="fig 7. Comparaison des temps d’exécutions, et de la quelité des résultats de PAM avec et sans l’heuristique" />
-<figcaption aria-hidden="true">fig 7. Comparaison des temps
+<figcaption aria-hidden="true"><em>fig 7. Comparaison des temps
 d’exécutions, et de la quelité des résultats de PAM avec et sans
-l’heuristique</figcaption>
+l’heuristique</em></figcaption>
 </figure>
 <figure>
-<img src="asset/TODO.svg"
+<img src="asset/acceleration_2k.svg"
 alt="fig 8. Courbe d’accélération de l’execution du programme" />
-<figcaption aria-hidden="true">fig 8. Courbe d’accélération de
-l’execution du programme</figcaption>
+<figcaption aria-hidden="true"><em>fig 8. Courbe d’accélération de
+l’execution du programme</em></figcaption>
 </figure>
+<blockquote>
+<p><strong>Calcul de l’accelération</strong> : <span
+class="math display">\text{speedup} = \frac{T_{seq}}{T_{nprocs}} \times
+100</span></p>
+</blockquote>
 </body>
 </html>
