@@ -92,6 +92,9 @@ fonctionnement avec le pseudocode suivant</p>
 class="math inline">x</span> blocs de taille <span class="math inline">b
 \times b</span> (avec <span class="math inline">b = \frac{ ||V||
 }{\sqrt{x}}</span>).</p>
+<div style="break-after: page;">
+
+</div>
 <p>En effet, à chaque itération de la boucle, un bloc n’a besoin que
 d’une ligne de données reçue de sa colonne de blocs, et d’une colonne de
 données reçue de sa ligne de blocs. En partageant donc les blocs entre
@@ -201,6 +204,9 @@ une matrice de taille <span class="math inline">nb\_nodes \times
 toutes les données etant stockées dans le même fichier, mais son temps
 d’exécution est négligeable (cf fig 7, le temps de lecture n’apparait
 même pas sur le graphique)</p>
+<div style="break-after: page;">
+
+</div>
 <h3 id="construction-de-la-matrice-dadjacence">Construction de la
 matrice d’adjacence</h3>
 <p>La construction de la matrice d’adjacence en revanche est
@@ -319,14 +325,15 @@ l’heuristique (sans l’heuristique ici signifie que l’on séléctionne
 observer que l’on obtient bien un résultat de meilleur qualitée (coût de
 160773 contre 161503), mais ce résultat n’est que 0,45% meilleur, alors
 que les temps d’executions sont bien pire.</p>
-<pre><code>  .-------------------+------------------+-----------------+------------.  
-  |                   | avec heuristique | choix aléatoire |  variation |  
-  +-------------------+------------------+-----------------+------------+  
-  | coût du résultat  |           160773 |          161503 |    +0,45 % |  
-  | temps d&#39;execution |      11413,32 ms |     442,1096 ms |   -96,13 % |  
-  &#39;-------------------+------------------+-----------------+------------&#39;  </code></pre>
+<pre><code>  .-------------------------+-------------+-----------------+------------.
+  |                         | heuristique | choix aléatoire |  variation |
+  +-------------------------+-------------+-----------------+------------+
+  | coût du résultat        |      160773 |          161503 |    +0,45 % |
+  | temps d&#39;exécution (PAM) | 11413,32 ms |     442,1096 ms |   -96,13 % |
+  | temps d&#39;exécution (TOT) | 43172,63 ms |     34747,78 ms |   -19,51 % |
+  &#39;-------------------------+-------------+-----------------+------------&#39;</code></pre>
 <p><em>fig 8. Comparaison des résultats et du temps d’execution de PAM
-pour 2k noeuds et 16 coeurs (</em><code>--oversubscribe</code>
+pour 2k noeuds et 16 coeurs (</em> <code>--oversubscribe</code>
 <em>utilisé) avec et sans heuristique</em></p>
 <blockquote>
 <p><strong>Remarque</strong> : ces tests ont été faites sur une machine
@@ -335,11 +342,13 @@ différente de celle utilisée pour les bench.</p>
 <p>Il convient toutefois de remettre ce chiffre en perspective, cette
 variation bien que grande reste inférieur au temps d’initialisation ou
 au temps d’execution de l’algorithme de Roy-Floyd-Warshall.</p>
-<p>Lors des benchs, nous somme arrivé à la conclusion que l’heuristique
-proposée n’est pas adaptée au problème, l’augmentation est trop faible
-pour justifier l’augmentation de coût qu’elle produit, cepandant elle
-etait prometteuse et nous avons décidé de la garder dans le code dans
-une démarche de transparence, le but de ce rapport etant de montrer le
-travail effectué durant le projet.</p>
+<p>Lors des benchs, nous sommes arrivés à la conclusion que
+l’heuristique proposée n’est pas adaptée au problème : l’amélioration du
+résultat est trop faible pour justifier l’augmentation de coût qu’elle
+engendre. Cependant, elle reste prometteuse et une exploration plus
+approfondie de la piste de l’échantillonnage serait à réaliser. Nous
+avons décidé de la conserver dans le code dans une démarche de
+transparence, le but de ce rapport étant de montrer le travail effectué
+durant le projet.</p>
 </body>
 </html>

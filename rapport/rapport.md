@@ -37,6 +37,8 @@ pour l de 0 à nb_nodes,
 
 La parallélisation de cet algo repose sur le découpage en $x$ blocs de taille $b \times b$ (avec $b = \frac{ ||V|| }{\sqrt{x}}$).
 
+<div style="break-after: page;"></div>
+
 En effet, à chaque itération de la boucle, un bloc n'a besoin que d'une ligne de données reçue de sa colonne de blocs, et d'une colonne de données reçue de sa ligne de blocs. En partageant donc les blocs entre $x$ coeurs, et en les faisant partager les lignes et colonnes de données utiles, on peut effectuer les opérations de comparaisons en simultané, ce qui accélère l'exécution.
 
 ![*fig 1. Exemple de partage de la matrice par bloc*](./asset/bloc_share_floyd_schéma_tableau.jpg)
@@ -80,13 +82,15 @@ Le coût étant de l'ordre de $n^2$, fragmenter suffisamment la matrice permet d
 > **Remarque** : 
 > Dans le cas où la taille des données reste trop grande pour effectuer ce pré-traitement, il est aussi possible de n'effectuer celui-ci que sur un échantillon de notre donnée.
 
-## Application à des données de séquences d’ARN
+## Application à des données de séquences d'ARN
 
 Pour l'application des algorithmes à ce nouveau type de donnée, la seule adaptation que nous avons dû faire à été de programmer un nouveau parseur pour extraire les données du fichier source, et de mettre en place la génération de la matrice d'adjacence sur ces données.
 
 ### Parsing du fichier
 
 Les fichiers aillant une structure assez simple, le parseur en lui même (contenu dans `readArnFromFile`) consiste simplement à placer et à aligner les chaines de caractères extraite du fichier dans une matrice de taille $nb\_nodes \times ||séquence\ arn||$. Cette opération n'est pas parallélisable, toutes les données etant stockées dans le même fichier, mais son temps d'exécution est négligeable (cf fig 7, le temps de lecture n'apparait même pas sur le graphique)
+
+<div style="break-after: page;"></div>
 
 ### Construction de la matrice d'adjacence
 
@@ -140,18 +144,18 @@ Comme vous avez pu l'observer sur les figures précédentes, il semble que l'heu
 En effet si l'on compare les résultats obtenus avec et sans l'heuristique (sans l'heuristique ici signifie que l'on séléctionne $k$ candidats aléatoires), on peut observer que l'on obtient bien un résultat de meilleur qualitée (coût de 160773 contre 161503), mais ce résultat n'est que 0,45% meilleur, alors que les temps d'executions sont bien pire.
 
 ```
-  .-------------------+------------------+-----------------+------------.  
-  |                   | avec heuristique | choix aléatoire |  variation |  
-  +-------------------+------------------+-----------------+------------+  
-  | coût du résultat  |           160773 |          161503 |    +0,45 % |  
-  | temps d'execution |      11413,32 ms |     442,1096 ms |   -96,13 % |  
-  '-------------------+------------------+-----------------+------------'  
+  .-------------------------+-------------+-----------------+------------.
+  |                         | heuristique | choix aléatoire |  variation |
+  +-------------------------+-------------+-----------------+------------+
+  | coût du résultat        |      160773 |          161503 |    +0,45 % |
+  | temps d'exécution (PAM) | 11413,32 ms |     442,1096 ms |   -96,13 % |
+  | temps d'exécution (TOT) | 43172,63 ms |     34747,78 ms |   -19,51 % |
+  '-------------------------+-------------+-----------------+------------'
 ```
-*fig 8. Comparaison des résultats et du temps d'execution de PAM pour 2k noeuds et 16 coeurs (*`--oversubscribe` *utilisé) avec et sans heuristique*
+*fig 8. Comparaison des résultats et du temps d'execution de PAM pour 2k noeuds et 16 coeurs (* `--oversubscribe` *utilisé) avec et sans heuristique*
 
 > **Remarque** : ces tests ont été faites sur une machine différente de celle utilisée pour les bench. 
 
 Il convient toutefois de remettre ce chiffre en perspective, cette variation bien que grande reste inférieur au temps d'initialisation ou au temps d'execution de l'algorithme de Roy-Floyd-Warshall.
 
-Lors des benchs, nous somme arrivé à la conclusion que l'heuristique proposée n'est pas adaptée au problème, l'augmentation est trop faible pour justifier l'augmentation de coût qu'elle produit, cepandant elle etait prometteuse et nous avons décidé de la garder dans le code dans une démarche de transparence, le but de ce rapport etant de montrer le travail effectué durant le projet.
-
+Lors des benchs, nous sommes arrivés à la conclusion que l'heuristique proposée n'est pas adaptée au problème : l'amélioration du résultat est trop faible pour justifier l'augmentation de coût qu'elle engendre. Cependant, elle reste prometteuse et une exploration plus approfondie de la piste de l'échantillonnage serait à réaliser. Nous avons décidé de la conserver dans le code dans une démarche de transparence, le but de ce rapport étant de montrer le travail effectué durant le projet.
