@@ -104,8 +104,6 @@ int main(int argc, char* argv[]) {
         mat_distances = repareAfterGather(nb_nodes, mat_gathered);
         affichage(mat_distances, nb_nodes, nb_nodes, 3, INF);
     }
-    
-    #if 0
 
     int *displs, *sendcount;
 
@@ -148,8 +146,6 @@ int main(int argc, char* argv[]) {
         affichage(reduced_candidates, 1,nb_nodes, 3, INF);
     }
 
-    // TODO NOUVEAUX CODE NATHAN 2025.11.25
-
     int *medoids = new int[K];
 
     if (pid == root) {
@@ -163,12 +159,6 @@ int main(int argc, char* argv[]) {
     int global_cost = 0;
 
     MPI_Reduce(&start_cost, &global_cost, 1, MPI_INT, MPI_SUM, root, MPI_COMM_WORLD);
-
-    if (pid == root) {
-        // TODO:DELETEME:DEBUG
-        cout << "starting cost : " << global_cost << endl ;
-        affichage(medoids, 1, K, 3, INF);
-    }
 
     int *permutations = new int[K*K];
     int *permutation_cost = new int[K];
@@ -206,12 +196,10 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        // TODO:OPTIMIZE:MAYBE: can this be optimized ? how can we know when we dont need to bcast ?
         MPI_Bcast(medoids, K, MPI_INT, root, MPI_COMM_WORLD);
     }
 
     if (pid == root) {
-        // TODO:DELETEME:DEBUG
         cout << "ending cost : " << global_cost << endl ;
         affichage(medoids, 1, K, 3, INF);
     }
@@ -232,8 +220,6 @@ int main(int argc, char* argv[]) {
         delete[] reduced_candidates;
     }    
     
-    #endif
-
     MPI_Finalize();
     return 0;
 }

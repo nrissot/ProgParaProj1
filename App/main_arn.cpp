@@ -130,12 +130,6 @@ int main(int argc, char* argv[]) {
 	MPI_Reduce(matrice_adjacence, temp, nb_nodes*nb_nodes, MPI_INT, MPI_SUM, root, MPI_COMM_WORLD);
     auto t_matrice_adjacence = std::chrono::high_resolution_clock::now();
 
-    // if (pid == root) {
-    //     // TODO:DELETEME:DEBUG
-    //     cout << "matrice d'adjacence" << endl;
-    //     affichage(temp, nb_nodes, nb_nodes, 3, INF);
-    // }
-
     int* matrice_prep;
 
 	if (pid == root) {
@@ -206,12 +200,6 @@ int main(int argc, char* argv[]) {
         mat_distances = repareAfterGather(nb_nodes, mat_gathered);
     }
 
-    // if (pid == root) {
-    //     // TODO:DELETEME:DEBUG
-    //     cout << "\n\n\nmatrice distances" << endl;
-    //     affichage(mat_distances, nb_nodes, nb_nodes, 3, INF);
-    // }
-
     auto t_fin_floyd = std::chrono::high_resolution_clock::now();
 
 	// PAM pour calculer les k-médoïdes
@@ -275,12 +263,6 @@ int main(int argc, char* argv[]) {
     }
     
     MPI_Reduce(local_chosen_candidates,reduced_candidates,nb_nodes,MPI_INT,MPI_SUM,root,MPI_COMM_WORLD);
-
-    // if (pid == root) {
-    //     // TODO:DELETEME:DEBUG
-    //     cout << "\n\n\nlocal chosen candidates (reduced)" << endl;
-    //     affichage(reduced_candidates, 1,nb_nodes, 3, INF);
-    // }
     
 	delete[] local_chosen_candidates;
     
@@ -297,13 +279,6 @@ int main(int argc, char* argv[]) {
     int global_cost = 0;
     
     MPI_Reduce(&start_cost, &global_cost, 1, MPI_INT, MPI_SUM, root, MPI_COMM_WORLD);
-    
-    
-    // if (pid == root) {
-    //     // TODO:DELETEME:DEBUG
-    //     cout << "starting cost : " << global_cost << endl ;
-    //     affichage(medoids, 1, K, 3, INF);
-    // }
     
     int *permutations = new int[K*K];
     int *permutation_cost = new int[K];
@@ -341,22 +316,20 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        // TODO:OPTIMIZE:MAYBE: can this be optimized ? how can we know when we dont need to bcast ?
         MPI_Bcast(medoids, K, MPI_INT, root, MPI_COMM_WORLD);
     }
     auto t_fin_pam = std::chrono::high_resolution_clock::now();
 
     if (pid == root) {
-        // TODO:DELETEME:DEBUG
         cout << "ending cost : " << global_cost << endl ;
         affichage(medoids, 1, K, 3, INF);
     }
 
 	// Export (+ calcul des communautées)
 
+    
     // NODES
     // C2N20 [label="C2N20",color="darkorchid"];
-
     if (pid == root) {
         ofstream ofile;
         ofile.open("output/arn.dot");

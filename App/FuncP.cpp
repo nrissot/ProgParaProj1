@@ -1,5 +1,4 @@
 #include "FuncP.hpp"
-#include <iostream>  // TODO:DELETEME
 
 // ____ PRIVATE HELPERS ________________________________________________________________________________________________
 
@@ -41,10 +40,6 @@ int cost_from_candidate_set(int *mat_distance_fragment, int* candidates, int k, 
     for(int current_node = 0; current_node < nb_lignes_fragment; current_node++) {
         int min_current = INF;          
         for (int i = 0 ; i < k; i++) {
-            // NOTE: old way to spot error, shoudlnt happen TODO:DELETEME ?
-            // if (mat_distance_fragment[current_node*nb_nodes + candidates[i]] == 0) {
-            //     return -1;
-            // }
             min_current = min(mat_distance_fragment[current_node*nb_nodes + candidates[i]], min_current);
         }
         sum += min_current;
@@ -220,13 +215,6 @@ int *findLocalMedoidCandidate(int *mat_distance_fragment, int k, int nb_nodes, i
         }
         int pid; 
         MPI_Comm_rank(MPI_COMM_WORLD, &pid);
-
-        // if(pid == 15){
-        //     cout << "affichage du fragment de matrice de 15: " << endl;
-        //     affichage(mat_distance_fragment, nb_lignes_fragment, nb_nodes,2,1000);
-        //     cout << "hmmmm trés intéressant hmm hmm " << endl; // TODO:DELETEME
-
-        // }
         
         
         // for each medoid
