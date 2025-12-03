@@ -110,17 +110,37 @@ De plus, nous n'avons pas lancé de test avec 9 coeurs, car les tailles des fich
 
 ![*fig 5. Performances moyennes (en ms) des étapes de génération de la matrice, de l'executions de l'algorithmes de Roy-Floyd-Warshall, de PAM et du total pour 2K noeuds selon le nombre de coeurs*](asset/2K_nodes.svg)
 
-Sur ces graphes des temps d'execution moyens, on remarque que pour presque toutes les étapes, le temps de calcul diminue au fur et à mesure que l'on augmente le nomnbre de processus (CF, fig 8. les courbes d'accélérations). 
+Sur ces graphes des temps d'execution moyens, on remarque que pour presque toutes les étapes, le temps de calcul diminue au fur et à mesure que l'on augmente le nombre de processus (CF, fig 6. les courbes d'accélérations). 
+
+![*fig 6. Courbe d'accélération de l'execution du programme*](asset/acceleration_2k.svg)
 
 Cepandant on remarque que pour PAM, le temps de calcul augmente légerement entre la version séquentielle et la version parallélisée. Cela est dù au fait que l'implémentation du premier calcul qui nous permet d'avoir une initialisation fiable des premiers candidats ne fonctionne pas avec un seul processeur, et à donc été remplacé par un simple choix aléatoire.
 
-![*fig 6. Courbe des temps d'execution cumulés, et pourcentage du temps total pour 500 noeuds selon le nombre de coeurs*](asset/temps_cumulés_500.svg)
+![*fig 7. Courbe des temps d'execution cumulés, et pourcentage du temps total pour 500 noeuds selon le nombre de coeurs*](asset/temps_cumulés_500.svg)
 
 Comme on peut le voir sur le graphe des courbes cumulés, ce changement implique qu'une plus grande part du temps d'execution total est dédié a cette étape, mais on peut aussi constater que les résultats obtenus par les executions de l'algorithme avec le pré-traitement heuristique sont bien meilleurs
 
 ![*fig 7. Comparaison des temps d'exécutions, et de la quelité des résultats de PAM avec et sans l'heuristique*](asset/TODO.svg)
 
-![*fig 8. Courbe d'accélération de l'execution du programme*](asset/acceleration_2k.svg)
-
 > **Calcul de l'accelération** : 
 > $$\text{speedup} = \frac{T_{seq}}{T_{nprocs}} \times 100$$
+
+## Retour sur l'Heuristique
+
+Comme vous avez pu l'observer sur les figures précédentes, il semble que l'heuristique que nous avions formulée sur la manière d'améliorer l'algorithme PAM n'est pas le franc succès que nous esperions.
+
+En effet si l'on compare les résultats obtenus avec et sans l'heuristique (sans l'heuristique ici signifie que l'on séléctionne $k$ candidats aléatoires), on peut observer que l'on obtient bien un résultat de meilleur qualitée (cout de 160773 contre 161503), mais ce résultat n'est que 0,45% meilleur, alors que les temps d'executions sont bien pire.
+
+```
+.-------------------+------------------+-----------------+------------.
+|                   | avec heuristique | choix aléatoire |  variation |
++-------------------+------------------+-----------------+------------+
+| cout du résultat  |           160773 |          161503 |    +0,45 % |
+| temps d'execution |      11413,32 ms |     442,1096 ms |   -96,13 % |
+'-------------------+------------------+-----------------+------------'
+```
+*fig 8. Comparaison des résultats et du temps d'execution de PAM avec et sans heuristique*
+
+Il convient toutefois de remettre ce chiffre en perspective, cette variation bien que grande reste inférieur au temps d'initialisation ou au temps d'execution de l'algorithme de Roy-Floyd-Warshall.
+
+Lors des benchs, nous somme arrivé à la conclusion que l'heuristique proposée n'est pas adaptée au problème, l'augmentation est trop faible pour justifier l'augmentation de cout qu'elle produit, cepandant elle etait prometteuse et nous avons décidé de la garder dans le code dans une démarche de transparence, le but de ce rapport etant de montrer le travail effectué durant le projet.
