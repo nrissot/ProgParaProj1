@@ -1,0 +1,1 @@
+pandoc rapport.md -t html -o o.html -s --katex --css "asset/style.css"

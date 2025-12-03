@@ -1,4 +1,4 @@
-2k + 16 oversubscribe
+> 2k : 16 proc --oversubscribe
 ___________________________________
 temps total : 15176.6ms
 temps init : 332.241ms
@@ -70,7 +70,7 @@ temps matrice distance : 540.849ms
 temps floyd : 10729.1ms
 temps pam : 3428.92ms
 _______________________________________
-2k 4proc
+> 2k : 4 proc
 _______________________________________
 temps total : 17211.5ms
 temps init : 229.782ms
@@ -142,7 +142,7 @@ temps matrice distance : 619.208ms
 temps floyd : 12001.7ms
 temps pam : 4093.28ms
 _____________________________________
-500 16thread
+> 500 : 16 proc --oversubscribe
 _____________________________________
 temps total : 717.954ms
 temps init : 326.805ms
@@ -214,7 +214,7 @@ temps matrice distance : 34.1131ms
 temps floyd : 200.164ms
 temps pam : 172.227ms
 _____________________________________
-500 4thread
+> 500 : 4 proc
 _____________________________________
 temps total : 669.675ms
 temps init : 229.278ms
@@ -286,7 +286,7 @@ temps matrice distance : 46.9074ms
 temps floyd : 195.224ms
 temps pam : 264.893ms
 ____________________________________
-500 1thread
+> 500 : 1 proc
 ____________________________________
 temps total : 1154.09ms
 temps init : 224.239ms
@@ -358,7 +358,7 @@ temps matrice distance : 143.408ms
 temps floyd : 770.266ms
 temps pam : 33.4171ms
 ____________________________________
-2k 1thread bonne chance à tous
+> 2k : 1 proc
 ____________________________________
 ending cost : 161503
 temps total : 51379.2ms
@@ -443,3 +443,4 @@ temps matrice distance : 2296.17ms
 temps floyd : 47848.9ms
 temps pam : 639.883ms
 __________________________________
+> EOF
