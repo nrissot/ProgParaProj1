@@ -2,6 +2,7 @@
 #define NEEDELMAN
 
 #include <algorithm> // needed for max()
+#include <omp.h>
 
 using namespace std;
 
@@ -14,5 +15,7 @@ using namespace std;
 int nw_distance_seq(const char *A, int lenA, const char *B, int lenB);
 
 int nw_distance_omp(const char *A, int lenA, const char *B, int lenB);
+
+void _choose_and_write(int* F, int i, int j, char a, char b, int lenA, int lenB);
 
 #endif

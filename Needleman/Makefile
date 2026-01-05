@@ -1,5 +1,5 @@
 CXX = mpic++
-CXXFLAGS = -std=c++11 -Wall -Wextra -pedantic -lcgraph -lgvc -lxdot
+CXXFLAGS = -std=c++11 -Wall -Wextra -pedantic -lcgraph -lgvc -lxdot -fopenmp
 
 main: main.o needleman_wunsch.o
 	$(CXX) -o $@ $^ $(CXXFLAGS)
