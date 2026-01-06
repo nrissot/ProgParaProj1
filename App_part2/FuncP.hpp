@@ -7,7 +7,8 @@
 #include <cstdlib>
 
 #include <mpi.h>
-#include "ForGraph.hpp"
+
+#define INF 9999
 
 using namespace std;
 
