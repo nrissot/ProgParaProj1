@@ -27,7 +27,7 @@ int nw_distance_seq(const char *A, int lenA, const char *B, int lenB)
 			_choose_and_write(F, H, i, j, A[i], B[j], lenA, lenB);
 		}
 	}
-	const int score = F[(lenA * lenB) - 1];
+	const int score = F[(lenA * lenB) - 1]+1;
 	delete[] F;
 	return score;
 }
@@ -67,7 +67,7 @@ int nw_distance_omp(const char *A, int lenA, const char *B, int lenB)
 			}
 		}
 	}
-	const int score = F[(lenA * lenB) - 1];
+	const int score = F[(lenA * lenB) - 1]+1;
 	delete[] F;
 	return score;
 }

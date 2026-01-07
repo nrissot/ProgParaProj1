@@ -36,8 +36,8 @@ void buildMatrixFragment(int *mat_adjacence, int nb_nodes, char *sequence_fragme
 		// pour chaque séquence d'ARN dans recv_buffer
 		for (int j = 0; j < recv_nb_lignes; ++j) {
 			distance = nw_distance_omp(&sequence_fragment[i*TAILLESEQ], TAILLESEQ, &recv_buffer[j*TAILLESEQ], TAILLESEQ);
-			if (distance <= SEUILDISTANCE) {
-				mat_adjacence[(fragment_offset+i) *nb_nodes + (recv_offset+j)] = distance;
+			if (distance > 0) {
+				mat_adjacence[(fragment_offset+i) *nb_nodes + (recv_offset+j)] = TAILLESEQ - distance;
 			}
 			// sinon on laisse à 0
 		}

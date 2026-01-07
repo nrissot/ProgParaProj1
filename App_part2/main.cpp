@@ -21,10 +21,6 @@ int main(int argc, char* argv[]) {
 	const int K = atoi(argv[2]);
 	const int NB_SEQ = atoi(argv[3]);
 
-    // get the number of digits in NB_SEQ
-    // maybe there is a simpler way to do it
-    const int uid_len = ((int) floor(log10(NB_SEQ))) + 1;
-
 	int pid, nprocs;
 	int root = 0;
 
