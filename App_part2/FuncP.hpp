@@ -7,6 +7,7 @@
 #include <cstdlib>
 
 #include <mpi.h>
+#include <omp.h>
 
 #define INF 9999
 
