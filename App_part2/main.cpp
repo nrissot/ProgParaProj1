@@ -34,9 +34,7 @@ int main(int argc, char* argv[]) {
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
-	if (pid == root) { // DEBUG:DELETEME:TODO
-		cout << "initialisation terminée" << endl;
-	}
+
 	auto t_init = std::chrono::high_resolution_clock::now();
 
 	char* sequences;
@@ -44,9 +42,7 @@ int main(int argc, char* argv[]) {
 	if (pid == root) {
 		sequences = readArnFromFile(argv[1], NB_SEQ);
 	}
-	if (pid == root) { // DEBUG:DELETEME:TODO
-		cout << "lecture terminée" << endl;
-	}
+
 	auto t_lecture = std::chrono::high_resolution_clock::now();
 
 	
@@ -123,11 +119,6 @@ int main(int argc, char* argv[]) {
 	
 	MPI_Reduce(matrice_adjacence, temp, nb_nodes*nb_nodes, MPI_INT, MPI_SUM, root, MPI_COMM_WORLD);
 
-	if (pid == root) { // DEBUG:DELETEME:TODO
-		cout << "aggrégation des fragments de matrices d'adjacence" << endl;
-		affichage(temp, nb_nodes, nb_nodes, 5, INF);
-		cout << "------------------------------------------------------------------------------" << endl;
-	}
 	auto t_matrice_adjacence = std::chrono::high_resolution_clock::now();
 
 	int* matrice_prep;
@@ -200,9 +191,6 @@ int main(int argc, char* argv[]) {
 		mat_distances = repareAfterGather(nb_nodes, mat_gathered);
 	}
 
-	if (pid == root) { // DEBUG:DELETEME:TODO
-		cout << "floyd terminée" << endl;
-	}
 	auto t_fin_floyd = std::chrono::high_resolution_clock::now();
 
 	// PAM pour calculer les k-médoïdes
@@ -322,14 +310,12 @@ int main(int argc, char* argv[]) {
 		MPI_Bcast(medoids, K, MPI_INT, root, MPI_COMM_WORLD);
 	}
 
-	if (pid == root) { // DEBUG:DELETEME:TODO
-		cout << "PAM terminée" << endl;
-	}
 	auto t_fin_pam = std::chrono::high_resolution_clock::now();
 
 	if (pid == root) {
 		cout << "ending cost : " << global_cost << endl ;
 		affichage(medoids, 1, K, 3, INF);
+		cout << "------------------------------------------------------------------------------" << endl;
 	}
 
 	// Export (+ calcul des communautées)
@@ -342,7 +328,6 @@ int main(int argc, char* argv[]) {
 		ofile.open("output/arn.dot");
 		ofile.clear();
 		ofile << "graph output_arn {\nnode [shape=circle, style=filled, color=lightyellow, fontcolor=black];\nedge [color=black, fontcolor=blue];\n" << endl;
-		
 		for (int i = 0; i < nb_nodes; ++i) {
 			// find the closest medoid (ie, community)
 			int closest_medoid_idx = 0;

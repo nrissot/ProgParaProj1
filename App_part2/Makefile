@@ -1,7 +1,7 @@
 CXX = mpic++
 CXXFLAGS = -std=c++11 -Wall -Wextra -pedantic -lcgraph -lgvc -lxdot -fopenmp
 
-all: main run cleano
+all: main cleano
 
 2000: main run_2000 cleano
 

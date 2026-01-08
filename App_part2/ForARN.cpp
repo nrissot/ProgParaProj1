@@ -30,13 +30,13 @@ char *readArnFromFile(char *f, int nb_nodes) {
 
 void buildMatrixFragment(int *mat_adjacence, int nb_nodes, char *sequence_fragment, int fragment_offset, int nb_lignes, char *recv_buffer, int recv_offset, int recv_nb_lignes) {
 	// mat_adjacence est seulement modifiée ici, pas besoin de malloc de la mémoire
-	int distance;
 	// pour chaque séquence d'ARN dans sequence_fragment
 	for (int i = 0; i < nb_lignes; ++i) {
 		// pour chaque séquence d'ARN dans recv_buffer
 		for (int j = 0; j < recv_nb_lignes; ++j) {
+			
 			// version séquentielle plus rapide que version parallèle...
-			distance = nw_distance_seq(&sequence_fragment[i*TAILLESEQ], TAILLESEQ, &recv_buffer[j*TAILLESEQ], TAILLESEQ);
+			int distance = nw_distance_seq(&sequence_fragment[i*TAILLESEQ], TAILLESEQ, &recv_buffer[j*TAILLESEQ], TAILLESEQ);
 			if (distance > 0) {
 				mat_adjacence[(fragment_offset+i) *nb_nodes + (recv_offset+j)] = TAILLESEQ - distance;
 			}
