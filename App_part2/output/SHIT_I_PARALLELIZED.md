@@ -46,6 +46,13 @@ int calculate_cost_fragment(int *medoids, int K, int *mat_distance_fragment, int
 }
 ```
 
+## MAIS
+
+lors de test je me suis apercu que cette parallélisation entraine de trop grandes pertes de performances (2.5 fois pire). 
+
+- Avec : temps total : 88286.6ms
+- Sans : temps total : 34721.5ms
+
 # `scatteredFloydAlgorithm` : boucle principales
 
 La double boucle principale (celle qui fait les calculs de minimum pour chaque case du bloc) peut être parallélisé car chaque case est indépendantes des autres.

@@ -341,10 +341,10 @@ int *get_k_best_elt(int *tab, int length, int k, int max)
     return out;
 }
 
+// DO NOT PARA, ~ 2.2 times worse
 int calculate_cost_fragment(int *medoids, int K, int *mat_distance_fragment, int nb_nodes, int nb_lignes)
 {
     int sum = 0;
-#pragma omp parallel for
     for (int i = 0; i < nb_lignes; ++i)
     {
         int min = mat_distance_fragment[i * nb_nodes + medoids[0]];
@@ -355,7 +355,6 @@ int calculate_cost_fragment(int *medoids, int K, int *mat_distance_fragment, int
                 min = mat_distance_fragment[i * nb_nodes + medoids[j]];
             }
         }
-#pragma omp atomic
         sum += min;
     }
     return sum;

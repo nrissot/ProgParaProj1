@@ -312,11 +312,11 @@ int main(int argc, char* argv[]) {
 
 	auto t_fin_pam = std::chrono::high_resolution_clock::now();
 
-	if (pid == root) {
-		cout << "ending cost : " << global_cost << endl ;
-		affichage(medoids, 1, K, 3, INF);
-		cout << "------------------------------------------------------------------------------" << endl;
-	}
+	// if (pid == root) {
+	// 	cout << "ending cost : " << global_cost << endl ;
+	// 	affichage(medoids, 1, K, 3, INF);
+	// 	cout << "------------------------------------------------------------------------------" << endl;
+	// }
 
 	// Export (+ calcul des communautées)
 
