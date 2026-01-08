@@ -23,6 +23,8 @@ $F(i,j)$ représente le meilleur score permettant de joindre la première séque
 
 Pour déterminer $F(i,j)$ on calcule le maximum entre $F(i-1,j-1) + S(arn1[i],arn2[j])$, ou bien $F(i-1,j) +$ la création ou l'agrandissement d'un trou, ou encore $F(i,j-1) +$ la création ou l'agrandissement d'un trou.
 
+<div style="break-after: page;"></div>
+
 Cette approche permet de calculer le meilleur score possible qui se trouvera dans la case F(len(arn1),len(arn2)) de notre matrice $F$.
 
 Pour déterminer si un trou est ajouté ou agrandi, une deuxième matrice $H$ contenant des booléens est actualisé a chaque étape. Si $H(i,j-1)$ (resp. $H(i-1,j)$) vaut `true`, alors on sait qu'il s'agit d'un agrandissement de trou déjà existant ce qui permet d'appliquer la pénalité de $-1$.
@@ -40,6 +42,8 @@ On peut voir dans l'implémentation séquentielle que chaque étape $i,j$ de la 
 On peut donc utiliser la directive `#pragma omp task`. Chaque tâche est indépendantes de l'id du proc, on peut donc spécifier que les tâches sont `untied`. Enfin, il ne reste plus qu'a remplir les dépendances (`depend()`) d'entrée (`in :`) et de sortie (`out :`).
 
 Pour créer les taches, on affecte la double boucle à une région `#pragma omp single nowait` pour qu'un seul thread crée les tâches, et que les autres thread n'attendent pas avant de travailler sur les tâches.
+
+<div style="break-after: page;"></div>
 
 ### Implémentation
 
@@ -123,6 +127,8 @@ Nous nous sommes donc concentré sur les fonction hors de `main.cpp`:
 
 Itérations de la boucle indépendantes les unes des autres, on peut donc remplacer la boucle `for` par un `parallel for`. Il faut bien penser à mettre l'instruction `atomic` avant l'incrémentation pour proteger l'écriture dans la somme.
 
+<div style="break-after: page;"></div>
+
 ```c++
 int cost_from_candidate_set(int *mat_distance_fragment, int *candidates, int k, int nb_nodes, int nb_lignes_fragment)
 {
@@ -201,6 +207,8 @@ Ces fonctions font théoriquement des étapes indépendantes les unes des autres
 
 Nous n'avons pas eu le temps de reprendre ces fonctions pour les rendres parallélisables.
 
+<div style="break-after: page;"></div>
+
 ## Benchmarks
 
 ![Temps moyens pour chaque partie](assets/500_nodes.svg)
@@ -213,13 +221,13 @@ En comparant avec les résultats de la partie 1 (figure ci-dessus), on voit que 
 
 Ces faibles performances sont probablement expliqué par la relative faible taille des données traitées, combiné a notre mauvaise maitrise de la combinaison entre OMP et MPI, et à la configuration de nos machine de dev/ test.
 
-Nous aurions probablement eu des résultats plus convenables avec des machines avec plus de threads, ou une grappe de machine.
-
-En utilisant MPI pour partager les données entre les machines, et OMP pour traiter les données au sein des machines.
+Nous aurions probablement eu des résultats plus convenables avec des machines avec plus de threads, ou une grappe de machine en utilisant MPI pour partager les données entre les machines, et OMP pour traiter les données au sein des machines.
 
 ![Taux d'accumulation](assets/acceleration_500.svg)
 
 ![Temps cumulés](assets/temps_cumulés_500.svg)
+
+<div style="break-after: page;"></div>
 
 > Nous n'avons malheureusement pas pu tester notre code sur le jeu de données de 2000 séquences, car la machine que nous avons utilisé pour les bench (poste de la salle ES4) n'a pas réussi à le faire tourner. Nous n'avons pas eu le temps de chercher les causes, mais nous suspectons que notre code sature trop les processeurs et threads.
 
