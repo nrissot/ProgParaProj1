@@ -1,0 +1,25 @@
+graph output_arn {
+node [shape=circle, style=filled, color=lightyellow, fontcolor=black];
+edge [color=black, fontcolor=blue];
+
+0 [label="0",color="aquamarine"];
+1 [label="1",color="aquamarine"];
+2 [label="2",color="aquamarine",fixedsize=true,width=2,height=2,shape="pentagon"];
+3 [label="3",color="hotpink1",fixedsize=true,width=2,height=2,shape="pentagon"];
+4 [label="4",color="aquamarine"];
+5 [label="5",color="aquamarine"];
+6 [label="6",color="aquamarine"];
+7 [label="7",color="aquamarine"];
+8 [label="8",color="aquamarine"];
+9 [label="9",color="aquamarine"];
+10 [label="10",color="hotpink1"];
+11 [label="11",color="aquamarine"];
+12 [label="12",color="aquamarine"];
+13 [label="13",color="chartreuse",fixedsize=true,width=2,height=2,shape="pentagon"];
+14 [label="14",color="aquamarine"];
+15 [label="15",color="aquamarine"];
+16 [label="16",color="aquamarine"];
+17 [label="17",color="aquamarine"];
+18 [label="18",color="aquamarine"];
+19 [label="19",color="goldenrod1",fixedsize=true,width=2,height=2,shape="pentagon"];
+}
