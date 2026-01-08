@@ -246,8 +246,6 @@ int *findLocalMedoidCandidate(int *mat_distance_fragment, int k, int nb_nodes, i
         // Array of local index node in our matrix fragment.
         int *index_locaux = new int[nb_lignes_fragment];
 
-// cannot be easily parallelized because of the break
-// DEBUG:NOTE:DELETEME parallelizing this loops cause seg faults, dont have time to investigate
 #pragma omp parallel for shared(mat_distance_fragment, index_locaux)
         for (int i = 0; i < nb_lignes_fragment; ++i)
         {

@@ -1,0 +1,238 @@
+> 500 : 16 proc --oversubscribe
+______________________________________
+temps total : 134968ms
+temps init : 331.938ms
+temps lecture : 0.15985ms
+temps matrice distance : 10236.1ms
+temps floyd : 122002ms
+temps pam : 2396.94ms
+______________________________________
+temps total : 140116ms
+temps init : 339.881ms
+temps lecture : 0.166968ms
+temps matrice distance : 10356.5ms
+temps floyd : 126972ms
+temps pam : 2447.45ms
+______________________________________
+temps total : 131719ms
+temps init : 327.953ms
+temps lecture : 0.170736ms
+temps matrice distance : 10162.2ms
+temps floyd : 119088ms
+temps pam : 2140.71ms
+______________________________________
+temps total : 138104ms
+temps init : 350.326ms
+temps lecture : 0.160794ms
+temps matrice distance : 10222.1ms
+temps floyd : 125145ms
+temps pam : 2386.83ms
+______________________________________
+temps total : 135762ms
+temps init : 335.368ms
+temps lecture : 0.159804ms
+temps matrice distance : 10222.8ms
+temps floyd : 122649ms
+temps pam : 2555.33ms
+______________________________________
+temps total : 135653ms
+temps init : 336.568ms
+temps lecture : 0.161816ms
+temps matrice distance : 10387.9ms
+temps floyd : 122544ms
+temps pam : 2384.68ms
+______________________________________
+temps total : 132696ms
+temps init : 333.022ms
+temps lecture : 0.158216ms
+temps matrice distance : 9994.29ms
+temps floyd : 119977ms
+temps pam : 2391.57ms
+______________________________________
+temps total : 134271ms
+temps init : 328.148ms
+temps lecture : 0.170826ms
+temps matrice distance : 9939.78ms
+temps floyd : 121478ms
+temps pam : 2525.08ms
+______________________________________
+temps total : 136748ms
+temps init : 353.802ms
+temps lecture : 0.162439ms
+temps matrice distance : 10156.9ms
+temps floyd : 123746ms
+temps pam : 2491.37ms
+______________________________________
+temps total : 131384ms
+temps init : 336.092ms
+temps lecture : 0.162413ms
+temps matrice distance : 10413.2ms
+temps floyd : 118226ms
+temps pam : 2409.35ms
+______________________________________
+temps total : 134718ms
+temps init : 337.344ms
+temps lecture : 0.164914ms
+temps matrice distance : 10770.6ms
+temps floyd : 121264ms
+temps pam : 2346.18ms
+______________________________________
+> 500 : 4 proc
+______________________________________
+temps total : 34202.2ms
+temps init : 230.187ms
+temps lecture : 0.12168ms
+temps matrice distance : 14947.4ms
+temps floyd : 18165.1ms
+temps pam : 859.423ms
+______________________________________
+temps total : 34245.4ms
+temps init : 230.718ms
+temps lecture : 0.120526ms
+temps matrice distance : 15012.1ms
+temps floyd : 18101.5ms
+temps pam : 900.916ms
+______________________________________
+temps total : 34146.6ms
+temps init : 231.392ms
+temps lecture : 0.121088ms
+temps matrice distance : 14934.2ms
+temps floyd : 18027.8ms
+temps pam : 953.163ms
+______________________________________
+temps total : 34853.6ms
+temps init : 231.255ms
+temps lecture : 0.120173ms
+temps matrice distance : 15017.4ms
+temps floyd : 18684.5ms
+temps pam : 920.32ms
+______________________________________
+temps total : 34571.5ms
+temps init : 229.471ms
+temps lecture : 0.174797ms
+temps matrice distance : 14964.7ms
+temps floyd : 18462.6ms
+temps pam : 914.518ms
+______________________________________
+temps total : 34110.2ms
+temps init : 230.745ms
+temps lecture : 0.122156ms
+temps matrice distance : 15038.1ms
+temps floyd : 18013.7ms
+temps pam : 827.538ms
+______________________________________
+temps total : 34464.7ms
+temps init : 229.387ms
+temps lecture : 0.125861ms
+temps matrice distance : 14934.8ms
+temps floyd : 18509.7ms
+temps pam : 790.704ms
+______________________________________
+temps total : 35099.3ms
+temps init : 228.993ms
+temps lecture : 0.12113ms
+temps matrice distance : 14942.8ms
+temps floyd : 19012.9ms
+temps pam : 914.601ms
+______________________________________
+temps total : 34823.2ms
+temps init : 228.282ms
+temps lecture : 0.175789ms
+temps matrice distance : 14960.2ms
+temps floyd : 18800.3ms
+temps pam : 834.297ms
+______________________________________
+temps total : 34754ms
+temps init : 226.835ms
+temps lecture : 0.119715ms
+temps matrice distance : 14983.3ms
+temps floyd : 18732.3ms
+temps pam : 811.389ms
+______________________________________
+temps total : 34492.4ms
+temps init : 231.36ms
+temps lecture : 0.122465ms
+temps matrice distance : 14967.2ms
+temps floyd : 18394.9ms
+temps pam : 898.794ms
+______________________________________
+> 500 : 1 proc
+______________________________________
+temps total : 60477.6ms
+temps init : 224.394ms
+temps lecture : 0.125074ms
+temps matrice distance : 59590.1ms
+temps floyd : 643.73ms
+temps pam : 19.2591ms
+______________________________________
+temps total : 60533.7ms
+temps init : 223.955ms
+temps lecture : 0.125856ms
+temps matrice distance : 59646.8ms
+temps floyd : 643.583ms
+temps pam : 19.2991ms
+______________________________________
+temps total : 60436.4ms
+temps init : 223.542ms
+temps lecture : 0.124903ms
+temps matrice distance : 59549.7ms
+temps floyd : 643.75ms
+temps pam : 19.2999ms
+______________________________________
+temps total : 60377.3ms
+temps init : 224.027ms
+temps lecture : 0.126942ms
+temps matrice distance : 59490.1ms
+temps floyd : 643.717ms
+temps pam : 19.2958ms
+______________________________________
+temps total : 60530.5ms
+temps init : 223.946ms
+temps lecture : 0.123243ms
+temps matrice distance : 59643.3ms
+temps floyd : 643.863ms
+temps pam : 19.2672ms
+______________________________________
+temps total : 60520ms
+temps init : 223.912ms
+temps lecture : 0.130232ms
+temps matrice distance : 59632.9ms
+temps floyd : 643.798ms
+temps pam : 19.2988ms
+______________________________________
+temps total : 60524.6ms
+temps init : 223.987ms
+temps lecture : 0.123649ms
+temps matrice distance : 59637.4ms
+temps floyd : 643.819ms
+temps pam : 19.3013ms
+______________________________________
+temps total : 60422.1ms
+temps init : 223.828ms
+temps lecture : 0.126571ms
+temps matrice distance : 59535.1ms
+temps floyd : 643.717ms
+temps pam : 19.2807ms
+______________________________________
+temps total : 60586.3ms
+temps init : 223.611ms
+temps lecture : 0.131559ms
+temps matrice distance : 59699.4ms
+temps floyd : 643.846ms
+temps pam : 19.3236ms
+______________________________________
+temps total : 60315.5ms
+temps init : 223.635ms
+temps lecture : 0.123684ms
+temps matrice distance : 59428.7ms
+temps floyd : 643.794ms
+temps pam : 19.2468ms
+______________________________________
+temps total : 60628ms
+temps init : 223.776ms
+temps lecture : 0.12464ms
+temps matrice distance : 59741.1ms
+temps floyd : 643.773ms
+temps pam : 19.3162ms
+______________________________________
+> EOF

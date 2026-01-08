@@ -39,13 +39,11 @@ int nw_distance_omp(const char *A, int lenA, const char *B, int lenB)
 
 	F[0] = 0;
 
-#pragma omp parallel for
 	for (int i = 1; i < lenA; ++i)
 	{
 		F[i * lenB] = GAP_PENALTY - i;
 	}
 
-#pragma omp parallel for
 	for (int j = 1; j < lenB; ++j)
 	{
 		F[j] = GAP_PENALTY - j;
