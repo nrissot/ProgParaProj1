@@ -56,32 +56,32 @@ for bench in mean_times:
             else :
                 ys500[j][i] = bench[1][j]
 
-# times for 2k nodes
-fig, axis = plt.subplots(2, 2, sharey=True)
-fig.set_size_inches(18, 10)
+# # times for 2k nodes
+# fig, axis = plt.subplots(2, 2, sharey=True)
+# fig.set_size_inches(18, 10)
 
-for t in range(len(TARGET_CHRONOS)):
-    i = VAL_NAMES.index(TARGET_CHRONOS[t])
-    ax = axis[t//2][t%2]
-    ax.plot(x, ys2k[i], "-o", color=colors_curve[t//2][t%2])
-    for j in range(len(x)):
-        xval = x[j]
-        yval = ys2k[i][j]
-        if j == 0:
-            if TARGET_CHRONOS[t] == "temps total" :
-                ax.text(xval+.4, yval-700, f"{yval}ms", horizontalalignment="left")
-            else :
-                ax.text(xval-.5, yval+2000, f"{yval}ms", horizontalalignment="left")
-        elif j == 1 :
-            ax.text(xval, yval+2000, f"{yval}ms", horizontalalignment="left")
-        else :
-            ax.text(xval, yval+2000, f"{yval}ms", horizontalalignment="right")
-    ax.set_title(f"[{TARGET_CHRONOS[t].split(" ")[1].upper()}]")
-    ax.set(xlabel="# de coeurs", ylabel="temps (ms)", xticks=x)
+# for t in range(len(TARGET_CHRONOS)):
+#     i = VAL_NAMES.index(TARGET_CHRONOS[t])
+#     ax = axis[t//2][t%2]
+#     ax.plot(x, ys2k[i], "-o", color=colors_curve[t//2][t%2])
+#     for j in range(len(x)):
+#         xval = x[j]
+#         yval = ys2k[i][j]
+#         if j == 0:
+#             if TARGET_CHRONOS[t] == "temps total" :
+#                 ax.text(xval+.4, yval-700, f"{yval}ms", horizontalalignment="left")
+#             else :
+#                 ax.text(xval-.5, yval+2000, f"{yval}ms", horizontalalignment="left")
+#         elif j == 1 :
+#             ax.text(xval, yval+2000, f"{yval}ms", horizontalalignment="left")
+#         else :
+#             ax.text(xval, yval+2000, f"{yval}ms", horizontalalignment="right")
+#     ax.set_title(f"[{TARGET_CHRONOS[t].split(" ")[1].upper()}]")
+#     ax.set(xlabel="# de coeurs", ylabel="temps (ms)", xticks=x)
 
-plt.savefig(f"../asset/2k_nodes.svg")
+# plt.savefig(f"2k_nodes.svg")
 
-plt.clf()
+# plt.clf()
 
 # times for 500 nodes
 
@@ -107,7 +107,7 @@ for t in range(len(TARGET_CHRONOS)):
     ax.set_title(f"[{TARGET_CHRONOS[t].split(" ")[1].upper()}]")
     ax.set(xlabel="# de coeurs", ylabel="temps (ms)", xticks=x)
 
-plt.savefig(f"../asset/500_nodes.svg")
+plt.savefig(f"500_nodes.svg")
 
 
 # cumulative times (500)
@@ -141,9 +141,29 @@ ax.vlines([1, 4, 16], 0, ys500[0], "k", "dotted")
 ax.legend()
 ax.set(xticks=x, xlabel="# de coeurs",  ylabel="temps cumulé (ms)")
 
-fig.savefig("../asset/temps_cumulés_500.svg")
+fig.savefig("temps_cumulés_500.svg")
 
 # speedup (2000)
+
+# plt.clf()
+
+# fig, axis = plt.subplots(2, 2, sharey=True)
+# fig.set_size_inches(18, 10)
+
+# for t in range(len(TARGET_CHRONOS)):
+#     i = VAL_NAMES.index(TARGET_CHRONOS[t])
+#     ax = axis[t//2][t%2]
+#     y = [1*100, ys2k[i][0]/ys2k[i][1]*100, ys2k[i][0]/ys2k[i][2]*100]
+#     for j in range(3):
+#         ax.text(x[j], y[j]+((15) if (TARGET_CHRONOS[t] == "temps pam") else (-30)), f"{round(y[j])}%", horizontalalignment=("left" if j != 2 else "right"))
+#     ax.plot(x, y, "-o", color=colors_curve[t//2][t%2])
+#     ax.set_title(f"[{TARGET_CHRONOS[t].split(" ")[1].upper()}]")
+#     ax.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=100)) 
+#     ax.set(xlabel="# de coeurs", ylabel="accélération", xticks=x)
+
+# plt.savefig(f"acceleration_2k.svg")
+
+# speedup (500)
 
 plt.clf()
 
@@ -153,7 +173,7 @@ fig.set_size_inches(18, 10)
 for t in range(len(TARGET_CHRONOS)):
     i = VAL_NAMES.index(TARGET_CHRONOS[t])
     ax = axis[t//2][t%2]
-    y = [1*100, ys2k[i][0]/ys2k[i][1]*100, ys2k[i][0]/ys2k[i][2]*100]
+    y = [1*100, ys500[i][0]/ys500[i][1]*100, ys500[i][0]/ys500[i][2]*100]
     for j in range(3):
         ax.text(x[j], y[j]+((15) if (TARGET_CHRONOS[t] == "temps pam") else (-30)), f"{round(y[j])}%", horizontalalignment=("left" if j != 2 else "right"))
     ax.plot(x, y, "-o", color=colors_curve[t//2][t%2])
@@ -161,4 +181,4 @@ for t in range(len(TARGET_CHRONOS)):
     ax.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=100)) 
     ax.set(xlabel="# de coeurs", ylabel="accélération", xticks=x)
 
-plt.savefig(f"../asset/acceleration_2k.svg")
+plt.savefig(f"acceleration_500.svg")

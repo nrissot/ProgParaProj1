@@ -203,7 +203,23 @@ Nous n'avons pas eu le temps de reprendre ces fonctions pour les rendres parall�
 
 ## Benchmarks
 
+![Temps moyens pour chaque partie](assets/500_nodes.svg)
 
+Comme attendu c'est avec 4 processeurs que le calcul est le plus rapide. On peut voir que la parallélisation de la boucle a l'intérieur de la partie Floyd cause une grosse augmentation du temps de calcul quand on utilise plus de 4 coeurs.
+
+![Temps moyens (partie 1 du projet)](assets/500_nodes_part1.svg)
+
+En comparant avec les résultats de la partie 1 (figure ci-dessus), on voit que le temps a empiré sur tout les domaines ou nous avons essayer de paralléliser.
+
+Ces faibles performances sont probablement expliqué par la relative faible taille des données traitées, combiné a notre mauvaise maitrise de la combinaison entre OMP et MPI, et à la configuration de nos machine de dev/ test.
+
+Nous aurions probablement eu des résultats plus convenables avec des machines avec plus de threads, ou une grappe de machine.
+
+En utilisant MPI pour partager les données entre les machines, et OMP pour traiter les données au sein des machines.
+
+![Taux d'accumulation](assets/acceleration_500.svg)
+
+![Temps cumulés](assets/temps_cumulés_500.svg)
 
 > Nous n'avons malheureusement pas pu tester notre code sur le jeu de données de 2000 séquences, car la machine que nous avons utilisé pour les bench (poste de la salle ES4) n'a pas réussi à le faire tourner. Nous n'avons pas eu le temps de chercher les causes, mais nous suspectons que notre code sature trop les processeurs et threads.
 
